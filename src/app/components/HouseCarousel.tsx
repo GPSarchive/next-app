@@ -1,35 +1,37 @@
 'use client';
-import Image from 'next/image';
-   
+
+import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import Slider, { Settings as SlickSettings } from 'react-slick';
+
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
-import styles from '@/app/components/HouseCarousel.module.css';
-import { SetStateAction, useState } from 'react';
 
-interface Image {
+import styles from '@/app/components/HouseCarousel.module.css';
+
+type HouseImage = {
   src: string;
   alt?: string;
-}
+};
 
-interface House {
-  firestoreId: string;
+type House = {
+  id: string;
   title: string;
   price: string;
-  images: Image[];
-}
+  images: HouseImage[];
+};
 
-interface HouseCarouselProps {
+type HouseCarouselProps = {
   house: House;
   onHover: (house: House) => void;
-}
+};
 
-interface ArrowProps {
+type ArrowProps = {
   onClick?: () => void;
-}
+};
 
-const CustomPrevArrow: React.FC<ArrowProps> = ({ onClick }) => (
+const CustomPrevArrow = ({ onClick }: ArrowProps) => (
   <button
     className={`${styles.arrow} ${styles.prevArrow}`}
     onClick={onClick}
@@ -50,7 +52,7 @@ const CustomPrevArrow: React.FC<ArrowProps> = ({ onClick }) => (
   </button>
 );
 
-const CustomNextArrow: React.FC<ArrowProps> = ({ onClick }) => (
+const CustomNextArrow = ({ onClick }: ArrowProps) => (
   <button
     className={`${styles.arrow} ${styles.nextArrow}`}
     onClick={onClick}
@@ -71,8 +73,8 @@ const CustomNextArrow: React.FC<ArrowProps> = ({ onClick }) => (
   </button>
 );
 
-const HouseCarousel: React.FC<HouseCarouselProps> = ({ house, onHover }) => {
-  const [currentIndex, setCurrentIndex] = useState<number>(0);
+const HouseCarousel = ({ house, onHover }: HouseCarouselProps) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
 
   const settings: SlickSettings = {
     dots: false,
@@ -85,11 +87,11 @@ const HouseCarousel: React.FC<HouseCarouselProps> = ({ house, onHover }) => {
     autoplaySpeed: 3000,
     prevArrow: <CustomPrevArrow />,
     nextArrow: <CustomNextArrow />,
-    beforeChange: (_: any, next: SetStateAction<number>) => setCurrentIndex(next),
+    beforeChange: (_, next) => setCurrentIndex(next),
   };
 
   return (
-    <Link href={`/houses/${house.firestoreId}`}>
+    <Link href={`/houses/${house.id}`} passHref>
       <div className={styles.carousel} onMouseEnter={() => onHover(house)}>
         <Slider {...settings}>
           {house.images.map((img, index) => (
@@ -97,8 +99,10 @@ const HouseCarousel: React.FC<HouseCarouselProps> = ({ house, onHover }) => {
               <Image
                 src={img.src}
                 alt={img.alt || `${house.title} - Image ${index + 1}`}
+                width={1200}
+                height={800}
                 className={styles.carouselImage}
-                loading={index === 0 ? 'eager' : 'lazy'}
+                priority={index === 0}
               />
               <figcaption className="sr-only">
                 {house.title} - {house.price}

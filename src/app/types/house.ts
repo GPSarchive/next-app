@@ -1,20 +1,27 @@
-// src/types/House.ts
-
-export interface HouseImage {
-    src: string;
-    alt?: string;
-  }
-  
-  export interface House {
-    id: string; // required for hover & motion key
-    firestoreId: string; // required for link generation
+export type House = {
+    id: string;
     title: string;
     price: string;
-    images: HouseImage[];
+    description?: string;
+    images: { src: string; alt?: string }[];
     location?: {
       latitude: number;
       longitude: number;
     };
+    latitude?: number;
+    longitude?: number;
+    category?: string;
+    size?: string;
+    bedrooms?: number;
+    parking?: string;
+    floor?: string;
+    energyClass?: string;
+    yearBuilt?: string;
+    kitchens?: string;
+    heatingType?: string;
+    specialFeatures?: string;
+    windowType?: string;
+    hasHeating?: string;
+    suitableFor?: string;
     [key: string]: any;
-  }
-  
+  };
