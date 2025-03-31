@@ -21,7 +21,9 @@ export async function POST(req: Request) {
     const sessionCookie = await admin.auth.createSessionCookie(token, { expiresIn });
 
     // ✅ Set HTTP-only cookie
-    cookies().set({
+    (await
+          // ✅ Set HTTP-only cookie
+          cookies()).set({
       name: COOKIE_NAME,
       value: sessionCookie,
       httpOnly: true,
@@ -38,6 +40,6 @@ export async function POST(req: Request) {
 }
 
 export async function DELETE() {
-  cookies().delete(COOKIE_NAME);
+  (await cookies()).delete(COOKIE_NAME);
   return NextResponse.json({ status: 'logged_out' });
 }
