@@ -64,10 +64,10 @@ const MapComponent = ({
       <Map
         {...viewState}
         onMove={(evt: ViewStateChangeEvent) => setViewState(evt.viewState)}
-        attribution='&copy; <a href="https://stadiamaps.com/" target="_blank">Stadia Maps</a>, &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'
+        attributionControl={{ compact: true }}
         onLoad={() => setMapLoaded(true)}
         style={{ width: "100%", height: "100%" }}
-        mapStyle="https://next-app-9694d.web.app/alidade_smooth_custom.json"
+        mapStyle='/alidade_smooth_custom.json'
       >
         <NavigationControl position="top-right" />
 
