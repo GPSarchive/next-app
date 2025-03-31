@@ -1,5 +1,6 @@
 'use client';
-
+import Image from 'next/image';
+   
 import Link from 'next/link';
 import Slider, { Settings as SlickSettings } from 'react-slick';
 import 'slick-carousel/slick/slick.css';
@@ -93,7 +94,7 @@ const HouseCarousel: React.FC<HouseCarouselProps> = ({ house, onHover }) => {
         <Slider {...settings}>
           {house.images.map((img, index) => (
             <figure key={index} className={styles.carouselSlide}>
-              <img
+              <Image
                 src={img.src}
                 alt={img.alt || `${house.title} - Image ${index + 1}`}
                 className={styles.carouselImage}
