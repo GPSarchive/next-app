@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from './PropertyDetails.module.css';
+import styles from '@/app/components/PropertyDetails.module.css';
 
 type PropertyDetailsProps = {
   property: {
