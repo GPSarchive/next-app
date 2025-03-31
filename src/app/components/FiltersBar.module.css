@@ -1,0 +1,66 @@
+/* ✅ Filter Bar Container */
+.filterBar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #f8f8f8;
+    padding: 12px 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 15px;
+    gap: 10px;
+}
+
+/* ✅ Dropdown Styling */
+.filterDropdown,
+.sortDropdown {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+    cursor: pointer;
+    background: white;
+}
+
+/* ✅ Results Count */
+.resultCount {
+    font-weight: bold;
+    font-size: 14px;
+}
+
+/* ✅ Button Group */
+.buttonGroup {
+    display: flex;
+    gap: 10px;
+}
+
+/* ✅ Buttons */
+.filterButton,
+.mapButton {
+    background: white;
+    border: 1px solid #ccc;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: 0.3s ease-in-out;
+}
+
+.filterButton:hover,
+.mapButton:hover {
+    background: #e0e0e0;
+}
+
+/* ✅ Responsive Design */
+@media (max-width: 768px) {
+    .filterBar {
+        flex-wrap: wrap;
+        gap: 5px;
+        padding: 10px;
+    }
+
+    .buttonGroup {
+        width: 100%;
+        justify-content: flex-end;
+    }
+}
