@@ -8,11 +8,12 @@ import "swiper/css/navigation";
 import "swiper/css/free-mode";
 import "swiper/css/effect-fade";
 import { Navigation, FreeMode, Autoplay } from "swiper/modules";
-import Modal from "./Modal";
-import styles from "./Gallery.module.css";
-import type { Swiper as SwiperInstance } from "swiper";
+import Modal from "./Modal"; // Ensure you have a Modal component in the same folder
 
-interface GalleryImage {
+import styles from "./Gallery.module.css";
+
+// Define a type for your image objects
+export interface GalleryImage {
   src: string;
   alt: string;
 }
@@ -21,14 +22,14 @@ interface GalleryProps {
   images: GalleryImage[];
 }
 
-export default function Gallery({ images }: GalleryProps): JSX.Element {
+export default function Gallery({ images }: GalleryProps) {
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const mainSwiperRef = useRef<SwiperInstance | null>(null);
-  const thumbSwiperRef = useRef<SwiperInstance | null>(null);
+  const mainSwiperRef = useRef<any>(null);
+  const thumbSwiperRef = useRef<any>(null);
 
   useEffect(() => {
-    if (thumbSwiperRef.current) {
+    if (mainSwiperRef.current && thumbSwiperRef.current) {
       thumbSwiperRef.current.slideToLoop(selectedIndex, 600);
     }
   }, [selectedIndex]);
@@ -38,8 +39,8 @@ export default function Gallery({ images }: GalleryProps): JSX.Element {
       {/* Main Carousel */}
       <div className={styles.mainCarouselContainer}>
         <Swiper
-          onSwiper={(swiper: SwiperInstance) => (mainSwiperRef.current = swiper)}
-          onSlideChange={(swiper: SwiperInstance) => setSelectedIndex(swiper.realIndex)}
+          onSwiper={(swiper) => (mainSwiperRef.current = swiper)}
+          onSlideChange={(swiper) => setSelectedIndex(swiper.realIndex)}
           navigation={true}
           loop={true}
           autoplay={{
@@ -51,7 +52,7 @@ export default function Gallery({ images }: GalleryProps): JSX.Element {
           className={styles.mainCarousel}
         >
           {images.map((image, index) => (
-            <SwiperSlide key={index} onClick={() => setIsModalOpen(true)}>
+            <SwiperSlide style={{ width: "100px" }} key={index} onClick={() => setIsModalOpen(true)}>
               <Image
                 src={image.src}
                 alt={image.alt}
@@ -67,10 +68,11 @@ export default function Gallery({ images }: GalleryProps): JSX.Element {
       {/* Thumbnail Carousel */}
       <div className={styles.thumbnailWrapper}>
         <Swiper
-          onSwiper={(swiper: SwiperInstance) => (thumbSwiperRef.current = swiper)}
+          onSwiper={(swiper) => (thumbSwiperRef.current = swiper)}
+          
           freeMode={true}
-          slidesPerView={7}
-          spaceBetween={2}
+          slidesPerView={6}
+          spaceBetween={1}
           loop={true}
           modules={[FreeMode]}
           className={styles.thumbnailContainer}
@@ -91,9 +93,9 @@ export default function Gallery({ images }: GalleryProps): JSX.Element {
                 <Image
                   src={image.src}
                   alt={image.alt}
-                  layout="fill"
-                  objectFit="cover"
-                  className={styles.mainImage}
+                  fill={true}
+                  
+                  className={styles.thumbnailImage}
                 />
               </div>
             </SwiperSlide>

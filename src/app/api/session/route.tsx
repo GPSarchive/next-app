@@ -17,7 +17,7 @@ export async function POST(req: Request) {
 
   try {
     // ✅ Create Firebase-native session cookie (7 days)
-    const expiresIn = 60 * 60 * 24 * 7 * 1000;
+    const expiresIn = 60 * 60 ;
     const sessionCookie = await admin.auth.createSessionCookie(token, { expiresIn });
 
     // ✅ Set HTTP-only cookie

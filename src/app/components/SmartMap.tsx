@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
-import MapComponentSSR from './MapComponentSSR';
+import MapComponentSSR from '@/app/components/MapComponentSSR';
 
 type House = {
   id: string;

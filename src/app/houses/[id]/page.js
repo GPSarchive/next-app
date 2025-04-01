@@ -1,4 +1,4 @@
-// src/app/houses/[id]/page.tsx
+// src/app/houses/[id]/page.js
 
 import { cookies } from 'next/headers';
 import { redirect, notFound } from 'next/navigation';
@@ -11,24 +11,15 @@ import NavBar from '@/app/components/NavBar';
 import SmartMap from '@/app/components/SmartMap';
 import styles from '@/app/components/PropertyPage.module.css';
 
-import type { Metadata } from 'next';
-import type { House } from '@/app/types/house';
-
-type Props = {
-  params: {
-    id: string;
-  };
-};
-
-export const metadata: Metadata = {
+export const metadata = {
   title: 'Property Details',
 };
 
-export default async function PropertyPage({ params }: Props) {
+export default async function PropertyPage({ params }) {
   const { id } = params;
   const cookieStore = cookies();
   const token = (await cookieStore).get('__session')?.value;
-
+  console.log('🔎 Fetching house with ID:', id);
   if (!token) {
     console.warn('❌ No session cookie found — redirecting');
     redirect('/login');
@@ -53,13 +44,15 @@ export default async function PropertyPage({ params }: Props) {
   try {
     const docRef = db.collection('houses').doc(id);
     const snapshot = await docRef.get();
+    console.log('Snapshot exists:', snapshot.exists);
+    console.log('Snapshot data:', snapshot.data());
 
     if (!snapshot.exists) {
       console.warn('❌ House not found:', id);
       notFound();
     }
 
-    const property = { id: snapshot.id, ...snapshot.data() } as House;
+    const property = { id: snapshot.id, ...snapshot.data() };
 
     const latitude = property.latitude || property.location?.latitude;
     const longitude = property.longitude || property.location?.longitude;
@@ -83,21 +76,18 @@ export default async function PropertyPage({ params }: Props) {
     return (
       <main className={styles.pageContainer}>
         <NavBar />
-
         <div className={`${styles.galleryWrapper} ${styles.fadeInLeft}`}>
           <Gallery
-            images={property.images.map((image) => ({
-              ...image,
-              alt: image.alt || 'Default alt text',
+            images={property.images.map((image, index) => ({
+              src: image.src,
+              alt: image.alt || `Property image ${index + 1}`,
             }))}
           />
         </div>
-
         <div className={styles.detailsMapContainer}>
           <div className={styles.detailsWrapper}>
             <PropertyDetails property={property} />
           </div>
-
           <div className={styles.mapWrapper}>
             <SmartMap
               houses={mapHouses}
@@ -106,9 +96,8 @@ export default async function PropertyPage({ params }: Props) {
             />
           </div>
         </div>
-
         <div className={styles.descriptionWrapper}>
-          <PropertyDescription description={property.description} />
+          <PropertyDescription description={property.description || ''} />
         </div>
       </main>
     );
