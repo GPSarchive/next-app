@@ -1,6 +1,5 @@
 import React from 'react';
 import styles from '@/app/components/PropertyDetails.module.css';
-
 type PropertyDetailsProps = {
   property: {
     category?: string;
