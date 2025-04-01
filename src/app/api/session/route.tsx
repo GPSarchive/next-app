@@ -16,25 +16,24 @@ export async function POST(req: Request) {
   }
 
   try {
-    // ✅ Create Firebase-native session cookie (7 days)
-    const expiresIn = 60 * 60 ;
+    // Create session cookie with 1 hour expiration
+    const expiresIn = 60 * 60 * 1000; // 3,600,000 milliseconds
+
     const sessionCookie = await admin.auth.createSessionCookie(token, { expiresIn });
 
-    // ✅ Set HTTP-only cookie
-    (await
-          // ✅ Set HTTP-only cookie
-          cookies()).set({
-      name: COOKIE_NAME,
-      value: sessionCookie,
-      httpOnly: true,
-      secure: true,
-      path: '/',
-      maxAge: expiresIn / 1000,
-    });
+        (await cookies()).set({
+          name: COOKIE_NAME,
+          value: sessionCookie,
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          path: '/',
+          maxAge: expiresIn / 1000, // convert back to seconds for cookie settings if needed
+        });
+
 
     return NextResponse.json({ status: 'authenticated' });
   } catch (err) {
-    console.error('❌ Session creation failed:', err);
+    console.error('Session creation failed:', err);
     return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
   }
 }

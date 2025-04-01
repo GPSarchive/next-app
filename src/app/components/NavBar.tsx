@@ -1,33 +1,43 @@
-"use client";
+'use client';
 
 import styles from "@/app/components/NavBar.module.css";
 import { Poppins } from "next/font/google";
 import { useRouter } from "next/navigation";
+import Link from 'next/link';
 
-// ✅ Load Poppins Font
 const poppins = Poppins({
   subsets: ["latin"],
   weight: ["300", "400", "600", "700"],
 });
 
-// =======================
-// Component
-// =======================
-
 const NavBar = () => {
   const router = useRouter();
 
   const handleLogout = async (): Promise<void> => {
-    await fetch("/api/logout", { method: "POST" });
-    router.push("/login");
+    try {
+      const res = await fetch('/api/session', { method: 'DELETE' });
+      if (res.ok) {
+        router.push("/login");
+      } else {
+        console.error('Logout failed', await res.text());
+      }
+    } catch (err) {
+      console.error('Logout error:', err);
+    }
   };
 
   return (
     <nav className={`${styles.navbar} ${poppins.className}`}>
       <ul className={styles.navLinks}>
-        <li><a href="#">Home</a></li>
-        <li><a href="#">Listings</a></li>
-        <li><a href="#">Contact</a></li>
+        <li>
+          <Link href="/">Home</Link>
+        </li>
+        <li>
+          <Link href="/listings">Listings</Link>
+        </li>
+        <li>
+          <Link href="/contact">Contact</Link>
+        </li>
         <li>
           <button onClick={handleLogout} className={styles.logoutBtn}>
             Logout

@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
@@ -16,20 +16,20 @@ export default function SignUp() {
     setError(null);
 
     try {
-      // 1️⃣ Create Firebase user
+      // Create Firebase user
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const idToken = await userCredential.user.getIdToken();
 
-      // 2️⃣ Send token to backend for secure cookie
+      // Send token to backend for secure cookie creation
       const res = await fetch("/api/session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idToken }),
+        body: JSON.stringify({ token: idToken }),
       });
 
       if (!res.ok) throw new Error("Token storage failed");
 
-      // 3️⃣ Redirect on success
+      // Redirect on success (optionally, you might want to redirect to /listings for auto-login)
       router.push("/login");
     } catch (err) {
       console.error("Signup error:", err);

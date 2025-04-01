@@ -1,4 +1,3 @@
-// hooks/useFirebaseLogin.ts
 'use client';
 
 import { auth } from '@/app/firebase/firebaseClient';
