@@ -5,7 +5,7 @@ import { getFirebaseAdmin } from "@/app/lib/firebaseAdmin";
 export default async function AdminDashboard() {
   // Retrieve session cookie
   const cookieStore = cookies();
-  const sessionCookie = cookieStore.get("__session")?.value;
+  const sessionCookie = (await cookieStore).get("__session")?.value;
 
   // Redirect if no session exists
   if (!sessionCookie) {
@@ -17,6 +17,10 @@ export default async function AdminDashboard() {
 
   try {
     // Verify session cookie and obtain token details
+    if (!admin) {
+      console.error("Firebase Admin SDK is not initialized.");
+      redirect("/login");
+    }
     decodedToken = await admin.auth.verifySessionCookie(sessionCookie, true);
   } catch (err) {
     console.error("Session verification failed:", err);
