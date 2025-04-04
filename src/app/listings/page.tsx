@@ -1,85 +1,83 @@
-
-
-export const runtime = "nodejs";
-
-import { cookies } from "next/headers";
-import { getFirebaseAdmin } from "@/app/lib/firebaseAdmin";
-import { redirect } from "next/navigation";
-import HouseGridWrapper from "@/app/components/HouseGridWrapper";
-import MapWrapper from "@/app/components/MapWrapper";
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 import NavBar from "@/app/components/NavBar";
+import HouseGridWrapper from "@/app/components/HouseGridWrapper";
 import FiltersWrapper from "@/app/components/FiltersWrapper";
 import styles from "@/app/components/HousesMapPage.module.css";
+import { getAllHouses } from "@/app/lib/firestore/houses";
+import type { House } from "@/app/types/house";
+import ClientMapWrapper from "@/app/components/CleintMapWrapper";
 
-// Optional type for Firestore docs (can extract to /types later)
-type House = {
-  id: string;
-  title: string;
-  price: string;
-  images: { src: string }[];
-  location?: {
-    latitude: number;
-    longitude: number;
-  };
-  [key: string]: any;
-};
+export const runtime = 'nodejs';
 
 export default async function SecureListingsPage() {
-  console.log("[SecureListingsPage] 🔐 Starting secure rendering");
-
   const cookieStore = cookies();
-  const sessionCookie = (await cookieStore).get("__session")?.value;
+  const sessionCookie = (await (await cookieStore).get('__session'))?.value;
 
   if (!sessionCookie) {
-    console.warn("[SecureListingsPage] ❌ No session cookie found — redirecting to /login");
-    redirect("/login");
+    console.log('No session cookie, redirecting to login');
+    redirect('/login');
   }
+
+  let responseData;
 
   try {
-    const firebaseAdmin = getFirebaseAdmin();
-    if (!firebaseAdmin) {
-      console.error("[SecureListingsPage] 🔥 Firebase Admin is not initialized");
-      redirect("/login");
-    }
-    const { auth: adminAuth, db: adminDB } = firebaseAdmin!;
-
-    const user = await adminAuth.verifySessionCookie(sessionCookie, true);
-    console.log("[SecureListingsPage] ✅ Session verified — UID:", user.uid);
-
-    const snapshot = await adminDB.collection("houses").get();
-    console.log(`[SecureListingsPage] 📦 Retrieved ${snapshot.size} houses from Firestore`);
-
-    const houses: House[] = snapshot.docs.map((doc) => {
-      const data = doc.data();
-      return {
-        id: doc.id,
-        title: data.title || "Untitled",
-        price: data.price || "0",
-        images: data.images || [],
-        location: data.location,
-        ...data,
-      };
-    });
-
-    return (
-      <div className={styles.container}>
-        <NavBar />
-        <div className={styles.content}>
-          <div className={styles.leftPanel}>
-            <div className={styles.filtersWrapper}>
-              <FiltersWrapper resultsCount={houses.length} />
-            </div>
-            <HouseGridWrapper houses={houses} />
-          </div>
-          <div className={styles.rightPanel}>
-            <MapWrapper houses={houses} />
-          </div>
-        </div>
-      </div>
+    const response = await fetch(
+      `https://us-central1-real-estate-5ca52.cloudfunctions.net/verifySession`, // Local emulator URL
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data: { sessionCookie } }),
+      }
     );
 
-  } catch (err) {
-    console.error("[SecureListingsPage] 🔥 Error verifying session or fetching data:", err);
-    redirect("/login");
+    console.log('Fetch status:', response.status);
+    if (!response.ok) {
+      console.error('Fetch failed with status:', response.status, await response.text());
+      redirect('/login');
+    }
+
+    const result = await response.json();
+    console.log('Raw Cloud Function response:', result);
+
+    // Adjust for emulator response structure (result) vs production (data)
+    const isEmulator = process.env.NODE_ENV === 'development';
+    responseData = isEmulator
+      ? (result.result as { status: string; redirectTo?: string; role?: string; message?: string })
+      : (result.data as { status: string; redirectTo?: string; role?: string; message?: string });
+
+    if (!responseData || typeof responseData !== 'object' || !('status' in responseData)) {
+      console.error('Unexpected response structure:', result);
+      redirect('/login');
+    }
+
+    console.log('Parsed response data:', responseData);
+  } catch (error) {
+    console.error('Error fetching from Cloud Function:', error);
+    redirect('/login');
   }
+
+  if (responseData.status !== 'authorized') {
+    console.log('Redirecting due to status:', responseData.status);
+    redirect(responseData.redirectTo || '/login');
+  }
+
+  const houses = await getAllHouses();
+
+  return (
+    <div className={styles.container}>
+      <NavBar />
+      <div className={styles.content}>
+        <div className={styles.leftPanel}>
+          <div className={styles.filtersWrapper}>
+            <FiltersWrapper resultsCount={houses.length} />
+          </div>
+          <HouseGridWrapper houses={houses} />
+        </div>
+        <div className={styles.rightPanel}>
+          <ClientMapWrapper houses={houses} />
+        </div>
+      </div>
+    </div>
+  );
 }

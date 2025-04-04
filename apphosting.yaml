@@ -1,23 +1,61 @@
-# Settings for Backend (on Cloud Run).
-# See https://firebase.google.com/docs/app-hosting/configure#cloud-run
+# apphosting.yaml
+
+# Cloud Run configuration for your backend
 runConfig:
-  minInstances: 0
-  # maxInstances: 100
-  # concurrency: 80
-  # cpu: 1
-  # memoryMiB: 512
+  minInstances: 1
+  maxInstances: 50
+  concurrency: 80
+  cpu: 1
+  memoryMiB: 512
 
-# Environment variables and secrets.
-# env:
-  # Configure environment variables.
-  # See https://firebase.google.com/docs/app-hosting/configure#user-defined-environment
-  # - variable: MESSAGE
-  #   value: Hello world!
-  #   availability:
-  #     - BUILD
-  #     - RUNTIME
+# Environment variables and secrets for your backend
+env:
+  - variable: ADMIN_PROJECT_ID
+    value: "real-estate-5ca52"
+    availability:
+      - BUILD
+      - RUNTIME
 
-  # Grant access to secrets in Cloud Secret Manager.
-  # See https://firebase.google.com/docs/app-hosting/configure#secret-parameters
-  # - variable: MY_SECRET
-  #   secret: mySecretRef
+  - variable: ADMIN_CLIENT_EMAIL
+    value: "firebase-adminsdk-fbsvc@real-estate-5ca52.iam.gserviceaccount.com"
+    availability:
+      - BUILD
+      - RUNTIME
+
+  - variable: ADMIN_PRIVATE_KEY
+    value: |-
+      -----BEGIN PRIVATE KEY-----
+      MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDdl/yuFBzwm7rG
+      EQzylWbn9suXLahEtfG7dGVILlCtuD1o/adZEpDWaX6+kPqG409D0PUOkRf4MqaT
+      xE1Hs1ch81NXqGV3+9uztOp1j8EwhmG0v45tcK6KS+vh7C+PkXy3w6Ea+1O3SX7V
+      m4rSOaeiXLIAnP3gUL9tLRIOcpaWGbot8A4s+veqlfvttGa3DmhcDeHaMxAB5WXl
+      pzmqKw67qLwn+QFNfpuUheksNgpPi+qOp6r9EMB7tzs1kf1p9pip71M0tpoeb9tk
+      NQ02zETHAgMBAAECggEAOJs6T6fQqsBFapJxecijlI8NfA2MRh0qZsX5l4JJVs9R
+      VLAzX0QoXrVtTLYRYYLQvVS0PSfgdSVPO0EysqXEFOapPCPG4+shORt2p1h1M/Wo
+      IPmsIxXdaHOziq+AiM7UCsd9MLzSKmiqb3SBmg8eVbBfQmV/XNUkGyKxvwvEIByh
+      WJ7Exrr3AZlXwo54EFwkLGAAyhZ5hPuYRajCA1dilCSLBaW+AHS++D8yQBnchvLr
+      Zd2ferFuvV1NBsKrH872k0WR6TvZECUkQi3DKeP5LgEP2stbiBPbwSJ10jnZavLN
+      L5Za/Uo5MUZZW6KyS1F4NVDMcCuWWtJ+Ecb+9XA0xQKBgQDxSeTW5XjOqt9Q9Jg1
+      5/NmHZAUiIVhHkrR8naKwXsmrz6TB/pCpKICMLcsJSb73nB7J6ZoMlcfuop9TPQC
+      CTASk9+Ke4M+bkLz5kxvGEY9a6O3n2OO+wRANM4Lb7wfbIzwzqGPIMg9haB9XScB
+      0Qt2ogRJXlh86AQY0cduKdlBDQKBgQDrGrA8Oli3z9DUa6D54Kyh58Y7yIAfQ8Wx
+      Cxh/OBM2GR9XfiXiCCmJlvuVKyFn7Cg4XlPH/1nhXDkOjodnelPjmRDw3gte+8Xq
+      QFewhsJ27QEkvUJbKCNOTrvhfMcNcMoM2cYbEhz4QOii2z0CrVAnn4oQgzSNRszg
+      hBV8bKHgIwKBgQDMqbX+hZQMEKntPBsjlkRBeI/uqsIf15b1L+lW1riD3p+ADYM8
+      JfL5UqL8QeMoPsw/2ijvNsvpsMupbq2GUI7DI0S4bP2s5c/Km6x3iyqBDJ1Isly7
+      ObWoVGH1F2iFawi9dTdadR8D+CViULI2ez9y+AgUx37dK9vVxZKYocySvQKBgGIY
+      m6o1qijf9EF9uwgn/7/6ZlMxgIwLCiSp/YmviwyKhPJLt2DNiQ9YyRZfjau/9LQ4
+      X3rWh9kpUsFJJSQ+/Vu81T27WEFEijsIp84HHILktxJuSY6he8HDxk76ck+gXR3p
+      R0lWQyxum4insY0NM39ROmLHabflrunJwfxPcoVprFv3ttb2AHWJI2jA6FSHduVw
+      Ve8sZgmxB6kD+Fh3pxdObhP9/43NxSTqXwuZ3XUO6KVouvPKM6SJWcTg8K7vRa9e
+      Cwt64AxTiHYO/J6vjvRHh+c=
+      -----END PRIVATE KEY-----
+    availability:
+      - BUILD
+      - RUNTIME
+      
+  - variable: ADMIN_SECRET
+    secret: real-estate-secret
+    availability:
+      - RUNTIME
+      - BUILD

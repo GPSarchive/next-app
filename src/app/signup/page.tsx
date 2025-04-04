@@ -1,3 +1,4 @@
+// src/app/signup.tsx
 'use client';
 
 import { useState, FormEvent } from "react";
@@ -16,24 +17,26 @@ export default function SignUp() {
     setError(null);
 
     try {
-      // Create Firebase user
+      // Create the user with Firebase Auth
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const idToken = await userCredential.user.getIdToken();
+      const uid = userCredential.user.uid;
 
-      // Send token to backend for secure cookie creation
-      const res = await fetch("/api/session", {
+      // Call the API route to set the default role (admin for first signup if DEFAULT_ROLE=admin)
+      const response = await fetch("/api/set-default-role", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token: idToken }),
+        body: JSON.stringify({ uid }),
       });
 
-      if (!res.ok) throw new Error("Token storage failed");
+      if (!response.ok) {
+        throw new Error("Failed to set default role");
+      }
 
-      // Redirect on success (optionally, you might want to redirect to /listings for auto-login)
+      // Redirect to login or another page
       router.push("/login");
     } catch (err) {
       console.error("Signup error:", err);
-      setError("❌ Sign up failed. Email may already be in use.");
+      setError("❌ Sign up failed. Please try again.");
     }
   };
 
