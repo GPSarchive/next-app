@@ -1,44 +1,45 @@
-// src/app/api/set-role/route.ts
-import { cookies } from 'next/headers';
+// src/app/api/session/route.tsx
+
 import { getFirebaseAdminAuth } from '@/app/lib/firebaseAdmin';
-import { NextRequest, NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
+import { NextResponse } from 'next/server';
 
 const COOKIE_NAME = process.env.COOKIE_NAME || '__session';
 
-export async function POST(req: NextRequest) {
+export async function POST(req: Request) {
+  const { token } = await req.json();
+
   const adminAuth = getFirebaseAdminAuth();
   if (!adminAuth) {
-    return NextResponse.json({ error: 'Firebase Admin not available' }, { status: 500 });
-  }
-
-  // Get the session cookie from the request
-  const sessionCookie = (await cookies()).get(COOKIE_NAME)?.value;
-  if (!sessionCookie) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    return NextResponse.json(
+      { error: 'Firebase Admin not available' },
+      { status: 500 }
+    );
   }
 
   try {
-    // Verify the caller's session and check their role
-    const decoded = await adminAuth.verifySessionCookie(sessionCookie, true);
-    const callerRole = decoded.role;
+    // Create session cookie with 1 hour expiration (in milliseconds)
+    const expiresIn = 60 * 60 * 1000; // 3,600,000 ms
+    const sessionCookie = await adminAuth.createSessionCookie(token, { expiresIn });
 
-    if (callerRole !== 'admin') {
-      return NextResponse.json({ error: 'Forbidden: Only admins can set roles' }, { status: 403 });
-    }
+    (await cookies()).set({
+      name: COOKIE_NAME,
+      value: sessionCookie,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      path: '/',
+      maxAge: expiresIn / 1000, // convert milliseconds to seconds for cookie settings
+      sameSite: 'lax',
+    });
 
-    // Get the target user's UID and desired role from the request body
-    const { uid, role } = await req.json();
-    if (!uid || !role || !['premium', 'admin'].includes(role)) {
-      return NextResponse.json({ error: 'Invalid input' }, { status: 400 });
-    }
-
-    // Set the custom claim for the target user
-    await adminAuth.setCustomUserClaims(uid, { role });
-    console.log(`Role set to ${role} for user ${uid}`);
-
-    return NextResponse.json({ message: `Role set to ${role} for user ${uid}` });
+    return NextResponse.json({ status: 'authenticated' });
   } catch (err) {
-    console.error('Error setting role:', err);
-    return NextResponse.json({ error: 'Invalid session or internal error' }, { status: 401 });
+    console.error('Session creation failed:', err);
+    return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
   }
+}
+
+export async function DELETE() {
+  (await cookies()).delete(COOKIE_NAME);
+  return NextResponse.json({ status: 'logged_out' });
 }
