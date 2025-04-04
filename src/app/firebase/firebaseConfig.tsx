@@ -41,9 +41,9 @@ if (typeof window !== 'undefined') {
     appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID!,
     measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID!,
   };
-
+  console.log('Firebase config:', firebaseConfig);
   app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
-
+  
   // ✅ App Check (ReCaptcha V3)
   initializeAppCheck(app, {
     provider: new ReCaptchaV3Provider(

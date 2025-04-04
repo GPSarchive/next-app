@@ -23,7 +23,7 @@ export default async function SecureListingsPage() {
 
   try {
     const response = await fetch(
-      `https://us-central1-real-estate-5ca52.cloudfunctions.net/verifySession`, // Local emulator URL
+      `https://us-central1-real-estate-5ca52.cloudfunctions.net/verifySession`, 
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -35,6 +35,8 @@ export default async function SecureListingsPage() {
     if (!response.ok) {
       console.error('Fetch failed with status:', response.status, await response.text());
       redirect('/login');
+    }else{
+      console.log('Secure Listings page Fetch succeeded:', await response.text());
     }
 
     const result = await response.json();
