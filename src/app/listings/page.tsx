@@ -11,8 +11,8 @@ import ClientMapWrapper from "@/app/components/CleintMapWrapper";
 export const runtime = 'nodejs';
 
 export default async function SecureListingsPage() {
-  const cookieStore = cookies();
-  const sessionCookie = (await (await cookieStore).get('__session'))?.value;
+  // Get session cookie synchronously in server components
+  const sessionCookie = (await cookies()).get('__session')?.value;
 
   if (!sessionCookie) {
     console.log('No session cookie, redirecting to login');
@@ -23,7 +23,7 @@ export default async function SecureListingsPage() {
 
   try {
     const response = await fetch(
-      `https://us-central1-real-estate-5ca52.cloudfunctions.net/verifySession`, 
+      `https://us-central1-real-estate-5ca52.cloudfunctions.net/verifySession`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -31,39 +31,34 @@ export default async function SecureListingsPage() {
       }
     );
 
-    console.log('Fetch status:', response.status);
-    if (!response.ok) {
-      console.error('Fetch failed with status:', response.status, await response.text());
-      redirect('/login');
-    }else{
-      console.log('Secure Listings page Fetch succeeded:', await response.text());
-    }
-
+    // Read the response body once as JSON
     const result = await response.json();
     console.log('Raw Cloud Function response:', result);
 
-    // Adjust for emulator response structure (result) vs production (data)
+    // Adjust for emulator (result) vs production (data) response structure
     const isEmulator = process.env.NODE_ENV === 'development';
-    responseData = isEmulator
-      ? (result.result as { status: string; redirectTo?: string; role?: string; message?: string })
-      : (result.data as { status: string; redirectTo?: string; role?: string; message?: string });
+    responseData = isEmulator ? result.result : result.data;
 
-    if (!responseData || typeof responseData !== 'object' || !('status' in responseData)) {
+    // Validate response structure
+    if (!responseData || !responseData.status) {
       console.error('Unexpected response structure:', result);
       redirect('/login');
     }
 
     console.log('Parsed response data:', responseData);
+
+    // Redirect if not authorized
+    if (responseData.status !== 'authorized') {
+      console.log('Redirecting due to status:', responseData.status);
+      redirect(responseData.redirectTo || '/login');
+    }
+
   } catch (error) {
     console.error('Error fetching from Cloud Function:', error);
     redirect('/login');
   }
 
-  if (responseData.status !== 'authorized') {
-    console.log('Redirecting due to status:', responseData.status);
-    redirect(responseData.redirectTo || '/login');
-  }
-
+  // If we reach here, status is 'authorized', so fetch houses and render page
   const houses = await getAllHouses();
 
   return (
