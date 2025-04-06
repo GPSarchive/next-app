@@ -22,6 +22,7 @@ export default async function SecureListingsPage() {
   let responseData;
 
   try {
+    // Call the Cloud Function to verify the session
     const response = await fetch(
       `https://us-central1-real-estate-5ca52.cloudfunctions.net/verifySession`,
       {
@@ -31,28 +32,24 @@ export default async function SecureListingsPage() {
       }
     );
 
-    // Read the response body once as JSON
-    const result = await response.json();
-    console.log('Raw Cloud Function response:', result);
-
-    // Adjust for emulator (result) vs production (data) response structure
-    const isEmulator = process.env.NODE_ENV === 'development';
-    responseData = isEmulator ? result.result : result.data;
-
-    // Validate response structure
-    if (!responseData || !responseData.status) {
-      console.error('Unexpected response structure:', result);
+    // If the fetch fails, redirect to login
+    if (!response.ok) {
+      console.error('Fetch failed with status:', response.status);
       redirect('/login');
     }
 
-    console.log('Parsed response data:', responseData);
+    // Parse the response
+    const result = await response.json();
+    console.log('Raw Cloud Function response:', result);
 
-    // Redirect if not authorized
-    if (responseData.status !== 'authorized') {
-      console.log('Redirecting due to status:', responseData.status);
-      redirect(responseData.redirectTo || '/login');
+    // Extract the status (assuming the response is { result: { status: 'authorized', role: 'admin' } })
+    const responseData = result.result; // Adjust this based on your Cloud Function's response structure
+
+    // Check if status is 'authorized'
+    if (responseData?.status !== 'authorized') {
+      console.log('Redirecting due to unauthorized status:', responseData?.status);
+      redirect('/login');
     }
-
   } catch (error) {
     console.error('Error fetching from Cloud Function:', error);
     redirect('/login');
