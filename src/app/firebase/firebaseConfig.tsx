@@ -44,13 +44,8 @@ if (typeof window !== 'undefined') {
   console.log('Firebase config:', firebaseConfig);
   app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
   
-  // ✅ App Check (ReCaptcha V3)
-  initializeAppCheck(app, {
-    provider: new ReCaptchaV3Provider(
-      process.env.NEXT_PUBLIC_FIREBASE_APPCHECK_KEY!
-    ),
-    isTokenAutoRefreshEnabled: true,
-  });
+
+  
 
   // ✅ Init Firebase services
   auth = getAuth(app);
