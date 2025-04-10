@@ -1,32 +1,28 @@
-// page.tsx
+// src/app/listings/page.tsx
 import NavBar from "@/app/components/NavBar";
-import HouseGridWrapper from "@/app/components/HouseGridWrapper";
 import FiltersWrapper from "@/app/components/FiltersWrapper";
 import ClientMapWrapper from "@/app/components/ClientMapWrapper";
+import SessionAuthGuard from "@/app/components/SessionAuthGuard"; // server-side guard
+import SecureHouseFetcher from "@/app/components/SecureHouseFetcher"; // client-side house fetcher
 import styles from "@/app/components/HousesMapPage.module.css";
-import { getAllHouses } from "@/app/lib/firestore/houses";
-import SessionAuthGuard from "@/app/components/SessionAuthGuard"; // Import your auth guard
 
 export const runtime = 'nodejs';
 
 export default async function SecureListingsPage() {
-  // Fetch houses AFTER authentication has been handled by the guard.
-  const houses = await getAllHouses();
-
+  // SessionAuthGuard runs on the server and ensures a valid session.
   return (
-    // Wrap your sensitive UI within the SessionAuthGuard
     <SessionAuthGuard>
       <div className={styles.container}>
         <NavBar />
         <div className={styles.content}>
           <div className={styles.leftPanel}>
-            <div className={styles.filtersWrapper}>
-              <FiltersWrapper resultsCount={houses.length} />
-            </div>
-            <HouseGridWrapper houses={houses} />
+            {/* Filters, etc. */}
+            <FiltersWrapper resultsCount={0} /> {/* Adjust count if needed */}
+            {/* SecureHouseFetcher retrieves houses from your protected Cloud Function */}
+            <SecureHouseFetcher />
           </div>
           <div className={styles.rightPanel}>
-            <ClientMapWrapper houses={houses} />
+            <ClientMapWrapper houses={[]} /> {/* Optionally use map data */}
           </div>
         </div>
       </div>

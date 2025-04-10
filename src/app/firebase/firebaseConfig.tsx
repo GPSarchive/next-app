@@ -58,14 +58,6 @@ if (typeof window !== 'undefined') {
   functions = getFunctions(app);
   storage = getStorage(app);
 
-  // ✅ Connect to Emulators if enabled
-  if (process.env.NEXT_PUBLIC_USE_EMULATORS === 'true') {
-    console.log('🧪 Connecting to Firebase Emulators...');
-    connectAuthEmulator(auth, 'http://localhost:9099', { disableWarnings: true });
-    connectFirestoreEmulator(db, 'localhost', 8080);
-    connectFunctionsEmulator(functions, 'localhost', 5001);
-    connectStorageEmulator(storage, 'localhost', 9199);
-  }
 }
 
 export { app, auth, db, functions, storage };

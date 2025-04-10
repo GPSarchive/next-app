@@ -35,14 +35,13 @@ export default async function SessionAuthGuard({ children }: SessionAuthGuardPro
 
     // Parse the response
     const result = await response.json();
-    console.log('Raw Cloud Function response:', result);
+   
 
     // Check if the session is authorized (adjust based on your API’s response structure)
-    const responseData = result.result;
-    if (responseData?.status !== 'authorized') {
-      console.log('Redirecting due to unauthorized status:', responseData?.status);
+    const  responseData = result.result;
+    if (!responseData || responseData.status !== 'authorized') {
       redirect('/login');
-    }
+    }    
   } catch (error) {
     console.error('Error fetching from Cloud Function:', error);
     redirect('/login');
