@@ -15,10 +15,7 @@ import {
   Functions,
 } from 'firebase/functions';
 import { getStorage, connectStorageEmulator, FirebaseStorage } from 'firebase/storage';
-import {
-  initializeAppCheck,
-  ReCaptchaV3Provider,
-} from 'firebase/app-check';
+
 
 // =======================
 // Firebase App Init (Client-only)

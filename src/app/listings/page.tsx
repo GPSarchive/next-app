@@ -18,7 +18,7 @@ export default async function ListingsPage() {
             <FiltersWrapper resultsCount={0} />
             {/* 💡 SecureHouseFetcher runs only when AppCheck is ready */}
             <AppCheckWrapper>
-              {(token) => <SecureHouseFetcher appCheckToken={token} />}
+              {(appCheckToken) => <SecureHouseFetcher appCheckToken={appCheckToken} />}
             </AppCheckWrapper>
           </div>
           <div className={styles.rightPanel}>

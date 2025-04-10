@@ -1,12 +1,19 @@
 'use client';
 
 import { ReactNode, useEffect, useState } from 'react';
-import { initializeAppCheck, getToken, ReCaptchaV3Provider } from 'firebase/app-check';
+import {
+  initializeAppCheck,
+  getToken,
+  ReCaptchaV3Provider,
+  AppCheck,
+} from 'firebase/app-check';
 import { app } from '@/app/firebase/firebaseConfig';
 
 interface AppCheckWrapperProps {
   children: (appCheckToken: string) => ReactNode;
 }
+
+let appCheckInstance: AppCheck | null = null;
 
 export default function AppCheckWrapper({ children }: AppCheckWrapperProps) {
   const [token, setToken] = useState<string | null>(null);
@@ -15,15 +22,19 @@ export default function AppCheckWrapper({ children }: AppCheckWrapperProps) {
   useEffect(() => {
     async function initAppCheck() {
       try {
-        const appCheck = initializeAppCheck(app, {
-          provider: new ReCaptchaV3Provider(process.env.NEXT_PUBLIC_FIREBASE_APPCHECK_KEY!),
-          isTokenAutoRefreshEnabled: true,
-        });
+        if (!appCheckInstance) {
+          appCheckInstance = initializeAppCheck(app, {
+            provider: new ReCaptchaV3Provider(
+              process.env.NEXT_PUBLIC_FIREBASE_APPCHECK_KEY!
+            ),
+            isTokenAutoRefreshEnabled: true,
+          });
+        }
 
-        const tokenResult = await getToken(appCheck, false);
+        const tokenResult = await getToken(appCheckInstance, false);
         setToken(tokenResult.token);
       } catch (err: any) {
-        console.error('[AppCheckWrapper] Failed to init App Check:', err.message);
+        console.error('[AppCheckWrapper] App Check error:', err.message);
         setError(err.message);
       }
     }
@@ -31,8 +42,8 @@ export default function AppCheckWrapper({ children }: AppCheckWrapperProps) {
     initAppCheck();
   }, []);
 
-  if (error) return <div>Error: {error}</div>;
-  if (!token) return <div>Loading security...</div>;
+  if (error) return <div>Error loading security: {error}</div>;
+  if (!token) return <div>Loading security check...</div>;
 
   return <>{children(token)}</>;
 }
