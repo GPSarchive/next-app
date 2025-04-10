@@ -1,5 +1,5 @@
 'use client';
-
+import { useEffect, useState } from 'react';
 import HouseGridWrapper from '@/app/components/HouseGridWrapper';
 
 type House = {
@@ -34,7 +34,36 @@ type Props = {
   houses: House[];
 };
 
-export default function SecureHouseFetcher({ houses }: Props) {
-  console.log('[SecureHouseFetcher] Rendering with houses:', houses.length);
+export default function SecureHouseFetcher({ appCheckToken }: { appCheckToken: string }) {
+  const [houses, setHouses] = useState<House[]>([]);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const res = await fetch('https://us-central1-your-project.cloudfunctions.net/getHouses', {
+          method: 'GET',
+          headers: {
+            'X-Firebase-AppCheck': appCheckToken,
+          },
+          credentials: 'include',
+        });
+
+        if (!res.ok) {
+          throw new Error(`Server error: ${await res.text()}`);
+        }
+
+        const data = await res.json();
+        setHouses(data.houses);
+      } catch (err: any) {
+        setError(err.message);
+      }
+    }
+
+    fetchData();
+  }, [appCheckToken]);
+
+  if (error) return <div>Error: {error}</div>;
+
   return <HouseGridWrapper houses={houses} />;
 }

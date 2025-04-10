@@ -4,7 +4,6 @@ import cors from "cors";
 
 admin.initializeApp();
 
-// Setup CORS middleware
 const corsHandler = cors({
   origin: true,
   credentials: true,
@@ -16,7 +15,12 @@ export const getHouses = functions.https
       corsHandler(req, res, async () => {
         try {
           console.log("[getHouses] Incoming request...");
-          // ✅ Verify App Check token
+          // Only accept POST
+          if (req.method !== "POST") {
+            res.status(405).send("Method Not Allowed");
+            return resolve();
+          }
+          // ✅ App Check token verification
           const appCheckToken = req.header("X-Firebase-AppCheck");
           if (!appCheckToken) {
             console.error("[getHouses] Missing App Check token");
@@ -25,7 +29,7 @@ export const getHouses = functions.https
           }
           await admin.appCheck().verifyToken(appCheckToken);
           console.log("[getHouses] App Check verified.");
-          // ✅ Get session cookie from body
+          // ✅ Get session cookie from request body
           const sessionCookie = req.body?.sessionCookie;
           if (!sessionCookie) {
             console.error("[getHouses] Missing sessionCookie in request body");
@@ -42,8 +46,7 @@ export const getHouses = functions.https
             return resolve();
           }
           // ✅ Fetch houses from Firestore
-          const snapshot = await admin.firestore()
-            .collection("houses").get();
+          const snapshot = await admin.firestore().collection("houses").get();
           const houses = snapshot.docs.map((doc) => ({
             id: doc.id,
             ...doc.data(),
