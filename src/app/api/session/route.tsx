@@ -1,45 +1,48 @@
-// src/app/api/session/route.tsx
-
 import { getFirebaseAdminAuth } from '@/app/lib/firebaseAdmin';
-import { cookies } from 'next/headers';
-import { NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 
-const COOKIE_NAME = process.env.COOKIE_NAME || '__session';
+const COOKIE_NAME = '__session'; // You can make this dynamic from env if preferred
 
-export async function POST(req: Request) {
-  const { token } = await req.json();
-
-  const adminAuth = getFirebaseAdminAuth();
-  if (!adminAuth) {
-    return NextResponse.json(
-      { error: 'Firebase Admin not available' },
-      { status: 500 }
-    );
-  }
-
+// POST: Set session cookie
+export async function POST(req: NextRequest) {
   try {
-    // Create session cookie with 1 hour expiration (in milliseconds)
-    const expiresIn = 60 * 60 * 1000; // 3,600,000 ms
+    const { token } = await req.json();
+
+    const adminAuth = getFirebaseAdminAuth();
+    if (!adminAuth) {
+      return new Response(JSON.stringify({ error: 'Firebase Admin not available' }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    const expiresIn = 60 * 60 * 1000; // 1 hour
     const sessionCookie = await adminAuth.createSessionCookie(token, { expiresIn });
 
-    (await cookies()).set({
-      name: COOKIE_NAME,
-      value: sessionCookie,
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      path: '/',
-      maxAge: expiresIn / 1000, // convert milliseconds to seconds for cookie settings
-      sameSite: 'lax',
+    return new Response(JSON.stringify({ status: 'authenticated' }), {
+      status: 200,
+      headers: {
+        'Set-Cookie': `${COOKIE_NAME}=${sessionCookie}; Max-Age=${expiresIn / 1000
+          }; Path=/; HttpOnly; Secure; SameSite=Lax`,
+        'Content-Type': 'application/json',
+      },
     });
-
-    return NextResponse.json({ status: 'authenticated' });
   } catch (err) {
     console.error('Session creation failed:', err);
-    return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+    return new Response(JSON.stringify({ error: 'Invalid token' }), {
+      status: 401,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 }
 
+// DELETE: Clear session cookie
 export async function DELETE() {
-  (await cookies()).delete(COOKIE_NAME);
-  return NextResponse.json({ status: 'logged_out' });
+  return new Response(JSON.stringify({ status: 'logged_out' }), {
+    status: 200,
+    headers: {
+      'Set-Cookie': `${COOKIE_NAME}=; Max-Age=0; Path=/; HttpOnly; Secure; SameSite=Lax`,
+      'Content-Type': 'application/json',
+    },
+  });
 }
