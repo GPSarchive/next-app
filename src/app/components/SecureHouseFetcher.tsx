@@ -46,10 +46,7 @@ export default function SecureHouseFetcher() {
   useEffect(() => {
     async function fetchHouses() {
       try {
-        const getHousesCallable = httpsCallable(functions, "getHouses", {
-          // For limited-use tokens (required if consumeAppCheckToken is true)
-          limitedUseAppCheckTokens: true,
-        });
+        const getHousesCallable = httpsCallable(functions, "getHouses");
 
         const result = await getHousesCallable({});
         const data = result.data as { houses: House[] };

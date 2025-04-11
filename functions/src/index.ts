@@ -1,4 +1,4 @@
-import * as functions from "firebase-functions";
+import * as functions from "firebase-functions/v1";
 import * as admin from "firebase-admin";
 import cors from "cors";
 import cookie from "cookie";
@@ -12,7 +12,10 @@ const corsHandler = cors({
   credentials: true,
 });
 
-export const getHouses = functions.https
+export const getHouses = functions
+  .runWith({
+    enforceAppCheck: true,
+  }).https
   .onRequest((req, res): Promise<void> => {
     return new Promise((resolve) => {
       corsHandler(req, res, async () => {
@@ -20,7 +23,7 @@ export const getHouses = functions.https
           console.log("[getHouses] Incoming request...");
 
           // Accept GET requests only.
-          if (req.method !== "GET") {
+          if (req.method !== "POST") {
             res.status(405).send("Method Not Allowed");
             return resolve();
           }
@@ -98,25 +101,24 @@ interface VerifySessionResponse {
 
 export const verifySession = functions.https.onCall(
   async (
-    data: functions.https.CallableRequest<VerifySessionData>
+    data: VerifySessionData,
+    _context: functions.https.CallableContext
   ): Promise<VerifySessionResponse> => {
-    const sessionCookie = data.data.sessionCookie;
+    const sessionCookie = data.sessionCookie;
 
     if (!sessionCookie) {
-      return {status: "unauthenticated", redirectTo: "/login"};
+      return { status: "unauthenticated", redirectTo: "/login" };
     }
 
     try {
-      const decodedClaims = await admin
-        .auth()
-        .verifySessionCookie(sessionCookie, true);
+      const decodedClaims = await admin.auth().verifySessionCookie(sessionCookie, true);
       const userRole = decodedClaims.role;
 
       if (!userRole || (userRole !== "premium" && userRole !== "admin")) {
-        return {status: "unauthorized", redirectTo: "/unauthorized"};
+        return { status: "unauthorized", redirectTo: "/unauthorized" };
       }
 
-      return {status: "authorized", role: userRole};
+      return { status: "authorized", role: userRole };
     } catch (error) {
       console.error("Error verifying session cookie:", error);
       return {
@@ -127,3 +129,4 @@ export const verifySession = functions.https.onCall(
     }
   }
 );
+
