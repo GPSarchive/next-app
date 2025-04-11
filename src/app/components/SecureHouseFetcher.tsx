@@ -46,22 +46,25 @@ export default function SecureHouseFetcher() {
   useEffect(() => {
     async function fetchHouses() {
       try {
-        // When replay protection is enabled, request limited-use tokens:
         const getHousesCallable = httpsCallable(functions, "getHouses", {
           // For limited-use tokens (required if consumeAppCheckToken is true)
           limitedUseAppCheckTokens: true,
         });
 
         const result = await getHousesCallable({});
-        // The function returns { houses: House[] }
         const data = result.data as { houses: House[] };
         setHouses(data.houses);
-      } catch (err: any) {
-        console.error("Error fetching houses:", err);
-        setError(err.message || "Error fetching houses.");
+      } catch (err: unknown) {
+        let errMsg: string;
+        if (err instanceof Error) {
+          errMsg = err.message;
+        } else {
+          errMsg = "Unknown error";
+        }
+        console.error("Error fetching houses:", errMsg);
+        setError(errMsg);
       }
     }
-
     fetchHouses();
   }, []);
 

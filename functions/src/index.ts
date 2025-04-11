@@ -12,70 +12,75 @@ const corsHandler = cors({
   credentials: true,
 });
 
-export const getHouses = functions
-  .https.onRequest((req, res): Promise<void> => {
-    return new Promise((resolve) => {
-      corsHandler(req, res, async () => {
-        try {
-          console.log("[getHouses] Incoming request...");
+export const getHouses = functions.https
+  .onRequest((req, res): Promise<void> => {
+  return new Promise((resolve) => {
+    corsHandler(req, res, async () => {
+      try {
+        console.log("[getHouses] Incoming request...");
 
-          // Accept GET requests only.
-          if (req.method !== "GET") {
-            res.status(405).send("Method Not Allowed");
-            return resolve();
-          }
-
-          // 1. App Check token verification.
-          const appCheckToken = req.header("X-Firebase-AppCheck");
-          if (!appCheckToken) {
-            console.error("[getHouses] Missing App Check token");
-            res.status(401).send("Missing App Check token.");
-            return resolve();
-          }
-          await admin.appCheck().verifyToken(appCheckToken);
-          console.log("[getHouses] App Check verified.");
-
-          // 2. Get session cookie (using cookie parsing)
-          const parsedCookies = req
-            .headers.cookie ? cookie.parse(req.headers.cookie) : {};
-          const sessionCookie = parsedCookies[process.env
-            .COOKIE_NAME || "__session"];
-          if (!sessionCookie) {
-            console.error("[getHouses] Missing session cookie");
-            res.status(401).send("Missing session cookie.");
-            return resolve();
-          }
-
-          // 3. Verify session cookie and check custom claims.
-          const decodedClaims = await admin.auth()
-            .verifySessionCookie(sessionCookie, true);
-          // Prefer a single key such as "tier" for clarity:
-          const userTier = decodedClaims.tier || decodedClaims.role;
-          console.log("[getHouses] User tier:", userTier);
-          if (userTier !== "admin" && userTier !== "premium") {
-            res.status(403).send("Insufficient privileges.");
-            return resolve();
-          }
-
-          // 4. Query the Firestore houses collection.
-          const snapshot = await admin.firestore()
-            .collection("houses").get();
-          const houses = snapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }));
-          console.log("[getHouses] Returning", houses.length, "houses.");
-          res.status(200).json({houses});
-        } catch (error: any) {
-          console.error("[getHouses] Error:", error.message || error);
-          res.status(500)
-            .send("Error processing request: " + (error.message || error));
-        } finally {
-          resolve();
+        // Accept GET requests only.
+        if (req.method !== "GET") {
+          res.status(405).send("Method Not Allowed");
+          return resolve();
         }
-      });
+
+        // 1. App Check token verification.
+        const appCheckToken = req.header("X-Firebase-AppCheck");
+        if (!appCheckToken) {
+          console.error("[getHouses] Missing App Check token");
+          res.status(401).send("Missing App Check token.");
+          return resolve();
+        }
+        await admin.appCheck().verifyToken(appCheckToken);
+        console.log("[getHouses] App Check verified.");
+
+        // 2. Get session cookie (using cookie parsing)
+        const parsedCookies = req
+        .headers.cookie ? cookie.parse(req.headers.cookie) : {};
+        // Use your environment variable COOKIE_NAME (or default to "__session")
+        const sessionCookie = parsedCookies[process.env
+          .COOKIE_NAME || "__session"];
+        if (!sessionCookie) {
+          console.error("[getHouses] Missing session cookie");
+          res.status(401).send("Missing session cookie.");
+          return resolve();
+        }
+
+        // 3. Verify session cookie and check custom claims.
+        const decodedClaims = await admin.auth()
+        .verifySessionCookie(sessionCookie, true);
+        // Prefer a single key such as "tier" for clarity:
+        const userTier = decodedClaims.tier || decodedClaims.role;
+        console.log("[getHouses] User tier:", userTier);
+        if (userTier !== "admin" && userTier !== "premium") {
+          res.status(403).send("Insufficient privileges.");
+          return resolve();
+        }
+
+        // 4. Query the Firestore houses collection.
+        const snapshot = await admin.firestore().collection("houses").get();
+        const houses = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        console.log("[getHouses] Returning", houses.length, "houses.");
+        res.status(200).json({ houses });
+      } catch (error: unknown) {
+        let errorMessage: string;
+        if (error instanceof Error) {
+          errorMessage = error.message;
+        } else {
+          errorMessage = "Unknown error";
+        }
+        console.error("[getHouses] Error:", errorMessage);
+        res.status(500).send("Error processing request: " + errorMessage);
+      } finally {
+        resolve();
+      }
     });
   });
+});
 
 
 // ---------------------------------------------------------
