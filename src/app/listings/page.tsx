@@ -2,13 +2,12 @@ import NavBar from '@/app/components/NavBar';
 import FiltersWrapper from '@/app/components/FiltersWrapper';
 import ClientMapWrapper from '@/app/components/ClientMapWrapper';
 import SessionAuthGuard from '@/app/components/SessionAuthGuard';
-import AppCheckWrapper from '@/app/components/AppCheckWrapper';
 import SecureHouseFetcher from '@/app/components/SecureHouseFetcher';
 import styles from '@/app/components/HousesMapPage.module.css';
 
 export const runtime = 'nodejs';
 
-export default async function ListingsPage() {
+export default async function SecureListingsPage() {
   return (
     <SessionAuthGuard>
       <div className={styles.container}>
@@ -16,10 +15,8 @@ export default async function ListingsPage() {
         <div className={styles.content}>
           <div className={styles.leftPanel}>
             <FiltersWrapper resultsCount={0} />
-            {/* 💡 SecureHouseFetcher runs only when AppCheck is ready */}
-            <AppCheckWrapper>
-              {(appCheckToken) => <SecureHouseFetcher appCheckToken={appCheckToken} />}
-            </AppCheckWrapper>  
+            {/* Houses are fetched securely */}
+            <SecureHouseFetcher />
           </div>
           <div className={styles.rightPanel}>
             <ClientMapWrapper houses={[]} />
