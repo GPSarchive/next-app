@@ -46,7 +46,7 @@ export default function SecureHouseFetcher({ appCheckToken }: { appCheckToken: s
           headers: {
             'X-Firebase-AppCheck': appCheckToken,
           },
-          credentials: 'include',
+          credentials: 'include', // Required to send cookies
         });
 
         if (!res.ok) {
@@ -67,3 +67,4 @@ export default function SecureHouseFetcher({ appCheckToken }: { appCheckToken: s
 
   return <HouseGridWrapper houses={houses} />;
 }
+

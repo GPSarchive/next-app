@@ -1,6 +1,7 @@
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 import cors from "cors";
+import cookie from "cookie";
 
 admin.initializeApp();
 
@@ -15,8 +16,8 @@ export const getHouses = functions.https
       corsHandler(req, res, async () => {
         try {
           console.log("[getHouses] Incoming request...");
-          // Only accept POST
-          if (req.method !== "POST") {
+          // ✅ Accept GET only
+          if (req.method !== "GET") {
             res.status(405).send("Method Not Allowed");
             return resolve();
           }
@@ -29,24 +30,30 @@ export const getHouses = functions.https
           }
           await admin.appCheck().verifyToken(appCheckToken);
           console.log("[getHouses] App Check verified.");
-          // ✅ Get session cookie from request body
-          const sessionCookie = req.body?.sessionCookie;
+          // ✅ Get session cookie from request headers
+          const cookies = req.headers.cookie ?
+            cookie.parse(req.headers.cookie) :
+            {};
+          const sessionCookie = cookies[process.env
+            .COOKIE_NAME || "__session"];
           if (!sessionCookie) {
-            console.error("[getHouses] Missing sessionCookie in request body");
+            console.error("[getHouses] Missing session cookie");
             res.status(401).send("Missing session cookie.");
             return resolve();
           }
           // ✅ Verify session cookie
-          const decodedClaims = await admin.auth()
+          const decodedClaims = await admin
+            .auth()
             .verifySessionCookie(sessionCookie, true);
-          const userTier = decodedClaims.tier;
-          console.log("[getHouses] Decoded user tier:", userTier);
+          const userTier = decodedClaims.tier || decodedClaims.role;
+          console.log("[getHouses] User tier:", userTier);
           if (userTier !== "admin" && userTier !== "premium") {
             res.status(403).send("Insufficient privileges.");
             return resolve();
           }
-          // ✅ Fetch houses from Firestore
-          const snapshot = await admin.firestore().collection("houses").get();
+          // ✅ Fetch data
+          const snapshot = await admin
+            .firestore().collection("houses").get();
           const houses = snapshot.docs.map((doc) => ({
             id: doc.id,
             ...doc.data(),
@@ -55,7 +62,8 @@ export const getHouses = functions.https
           res.status(200).json({houses});
         } catch (error: any) {
           console.error("[getHouses] Error:", error.message || error);
-          res.status(500)
+          res
+            .status(500)
             .send("Error processing request: " + (error.message || error));
         } finally {
           resolve();

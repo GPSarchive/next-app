@@ -15,17 +15,14 @@ import {
   Functions,
 } from 'firebase/functions';
 import { getStorage, connectStorageEmulator, FirebaseStorage } from 'firebase/storage';
-
-
-// =======================
-// Firebase App Init (Client-only)
-// =======================
+import { initializeAppCheck, AppCheck, ReCaptchaV3Provider } from 'firebase/app-check';
 
 let app: FirebaseApp;
 let auth: Auth;
 let db: Firestore;
 let functions: Functions;
 let storage: FirebaseStorage;
+let appCheck: AppCheck | undefined;
 
 if (typeof window !== 'undefined') {
   const firebaseConfig = {
@@ -38,18 +35,22 @@ if (typeof window !== 'undefined') {
     appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID!,
     measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID!,
   };
-  console.log('Firebase config:', firebaseConfig);
+
   app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
-  
 
-  
-
-  // ✅ Init Firebase services
+  // Init Firebase services
   auth = getAuth(app);
   db = initializeFirestore(app, { experimentalForceLongPolling: true });
   functions = getFunctions(app);
   storage = getStorage(app);
 
+  // Init App Check
+  if (!appCheck) {
+    appCheck = initializeAppCheck(app, {
+      provider: new ReCaptchaV3Provider(process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY!),
+      isTokenAutoRefreshEnabled: true,
+    });
+  }
 }
 
-export { app, auth, db, functions, storage };
+export { app, auth, db, functions, storage, appCheck };

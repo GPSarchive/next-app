@@ -19,7 +19,7 @@ export default async function ListingsPage() {
             {/* 💡 SecureHouseFetcher runs only when AppCheck is ready */}
             <AppCheckWrapper>
               {(appCheckToken) => <SecureHouseFetcher appCheckToken={appCheckToken} />}
-            </AppCheckWrapper>
+            </AppCheckWrapper>  
           </div>
           <div className={styles.rightPanel}>
             <ClientMapWrapper houses={[]} />
