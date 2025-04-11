@@ -1,6 +1,11 @@
 'use client';
-import { useEffect, useState } from 'react';
-import HouseGridWrapper from '@/app/components/HouseGridWrapper';
+
+import { useEffect, useState } from "react";
+import { httpsCallable } from "firebase/functions";
+import { functions } from "@/app/firebase/firebaseConfig";
+import HouseGridWrapper from "@/app/components/HouseGridWrapper";
+
+
 
 type House = {
   id: string;
@@ -34,37 +39,33 @@ type Props = {
   houses: House[];
 };
 
-export default function SecureHouseFetcher({ appCheckToken }: { appCheckToken: string }) {
+export default function SecureHouseFetcher() {
   const [houses, setHouses] = useState<House[]>([]);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string>("");
 
   useEffect(() => {
-    async function fetchData() {
+    async function fetchHouses() {
       try {
-        const res = await fetch('https://us-central1-your-project.cloudfunctions.net/getHouses', {
-          method: 'GET',
-          headers: {
-            'X-Firebase-AppCheck': appCheckToken,
-          },
-          credentials: 'include', // Required to send cookies
+        // When replay protection is enabled, request limited-use tokens:
+        const getHousesCallable = httpsCallable(functions, "getHouses", {
+          // For limited-use tokens (required if consumeAppCheckToken is true)
+          limitedUseAppCheckTokens: true,
         });
 
-        if (!res.ok) {
-          throw new Error(`Server error: ${await res.text()}`);
-        }
-
-        const data = await res.json();
+        const result = await getHousesCallable({});
+        // The function returns { houses: House[] }
+        const data = result.data as { houses: House[] };
         setHouses(data.houses);
       } catch (err: any) {
-        setError(err.message);
+        console.error("Error fetching houses:", err);
+        setError(err.message || "Error fetching houses.");
       }
     }
 
-    fetchData();
-  }, [appCheckToken]);
+    fetchHouses();
+  }, []);
 
   if (error) return <div>Error: {error}</div>;
 
   return <HouseGridWrapper houses={houses} />;
 }
-
