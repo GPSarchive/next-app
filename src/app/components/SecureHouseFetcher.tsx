@@ -1,5 +1,3 @@
-'use client';
-
 import { useEffect, useState } from "react";
 import { httpsCallable } from "firebase/functions";
 import { functions } from "@/app/firebase/firebaseConfig";
