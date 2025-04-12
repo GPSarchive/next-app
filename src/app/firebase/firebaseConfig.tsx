@@ -1,4 +1,4 @@
-// firebaseClient.ts
+// firebaseConfig.ts
 'use client';
 
 import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
@@ -35,10 +35,5 @@ export const auth = getAuth(app);
 export const db = initializeFirestore(app, { experimentalForceLongPolling: true });
 export const functions: Functions = getFunctions(app);
 
-// (Optional: If using emulators, enable them here.)
-// Example:
-// if (process.env.NEXT_PUBLIC_USE_EMULATORS === "true") {
-//   connectFunctionsEmulator(functions, 'localhost', 5001);
-// }
 
 export default app;

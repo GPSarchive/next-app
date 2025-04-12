@@ -1,11 +1,10 @@
+'use client';
 import { useEffect, useState } from "react";
 import { httpsCallable } from "firebase/functions";
 import { functions } from "@/app/firebase/firebaseConfig";
 import HouseGridWrapper from "@/app/components/HouseGridWrapper";
-import { cookies } from "next/headers";
 
-
-
+// Define your House type as before.
 type House = {
   id: string;
   title: string;
@@ -34,10 +33,6 @@ type House = {
   }[];
 };
 
-type Props = {
-  houses: House[];
-};
-
 export default function SecureHouseFetcher() {
   const [houses, setHouses] = useState<House[]>([]);
   const [error, setError] = useState<string>("");
@@ -45,21 +40,13 @@ export default function SecureHouseFetcher() {
   useEffect(() => {
     async function fetchHouses() {
       try {
-        const getHousesCallable = httpsCallable(functions, "getHouses");
-        // Assuming you have a function to read the session cookie (if not HTTP-only)
-        const sessionCookie = (await cookies()).get('__session')?.value;
-        const result = await getHousesCallable({ sessionCookie });
+        const getHouses = httpsCallable(functions, "getHouses");
+        const result = await getHouses();
         const data = result.data as { houses: House[] };
         setHouses(data.houses);
-      } catch (err: unknown) {
-        let errMsg: string;
-        if (err instanceof Error) {
-          errMsg = err.message;
-        } else {
-          errMsg = "Unknown error";
-        }
-        console.error("Error fetching houses:", errMsg);
-        setError(errMsg);
+      } catch (err: any) {
+        console.error("Error fetching houses:", err);
+        setError(err.message || "An error occurred");
       }
     }
     fetchHouses();
