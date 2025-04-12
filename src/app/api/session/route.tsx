@@ -5,6 +5,9 @@ import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 
 const COOKIE_NAME = process.env.COOKIE_NAME || '__session';
+// Set a common parent domain if available—for example, '.example.com'.
+// You can configure this via an environment variable.
+const COOKIE_DOMAIN = process.env.COOKIE_DOMAIN;
 
 export async function POST(req: Request) {
   const { token } = await req.json();
@@ -22,13 +25,19 @@ export async function POST(req: Request) {
     const expiresIn = 60 * 60 * 1000; // 3,600,000 ms
     const sessionCookie = await adminAuth.createSessionCookie(token, { expiresIn });
 
-    (await cookies()).set({
+    // When setting the cookie, include the domain attribute if provided.
+    await (await cookies()).set({
       name: COOKIE_NAME,
       value: sessionCookie,
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       path: '/',
-      maxAge: expiresIn / 1000, // convert milliseconds to seconds for cookie settings
+      // If COOKIE_DOMAIN is defined, it will be used.
+      // For example, if your website is hosted on 'app.example.com'
+      // and you want the cookie to be available on all subdomains,
+      // set COOKIE_DOMAIN to ".example.com".
+      ...(COOKIE_DOMAIN ? { domain: COOKIE_DOMAIN } : {}),
+      maxAge: expiresIn / 1000, // convert milliseconds to seconds
       sameSite: 'lax',
     });
 
@@ -40,6 +49,6 @@ export async function POST(req: Request) {
 }
 
 export async function DELETE() {
-  (await cookies()).delete(COOKIE_NAME);
+  await (await cookies()).delete(COOKIE_NAME);
   return NextResponse.json({ status: 'logged_out' });
 }

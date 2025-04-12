@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { httpsCallable } from "firebase/functions";
 import { functions } from "@/app/firebase/firebaseConfig";
 import HouseGridWrapper from "@/app/components/HouseGridWrapper";
+import { cookies } from "next/headers";
 
 
 
@@ -47,8 +48,9 @@ export default function SecureHouseFetcher() {
     async function fetchHouses() {
       try {
         const getHousesCallable = httpsCallable(functions, "getHouses");
-
-        const result = await getHousesCallable({});
+        // Assuming you have a function to read the session cookie (if not HTTP-only)
+        const sessionCookie = (await cookies()).get('__session')?.value;
+        const result = await getHousesCallable({ sessionCookie });
         const data = result.data as { houses: House[] };
         setHouses(data.houses);
       } catch (err: unknown) {
