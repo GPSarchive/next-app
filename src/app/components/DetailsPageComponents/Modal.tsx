@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
-import styles from '@/app/components/DetailsPageComponents/modal.module.css';
+import styles from '@/app/components/DetailsPageComponents/Modal.module.css';
 
 type ModalProps = {
   isOpen: boolean;
