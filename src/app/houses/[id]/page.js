@@ -2,7 +2,7 @@
 import { notFound } from 'next/navigation';
 import NavBar from '@/app/lib/NavBar';
 import SessionAuthGuard from '@/app/lib/SessionAuthGuard';
-import DetailsContent from '@/app/components/DetailsContent';
+import DetailsContent from '@/app/components/DetailsPageComponents/DetailsContent';
 
 export const metadata = {
   title: 'Property Details',
