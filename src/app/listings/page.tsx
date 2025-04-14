@@ -1,7 +1,7 @@
 import NavBar from '@/app/lib/NavBar';
 import ListingsContent from '@/app/components/ListingsPageComponents/ListingsContent';
 import SessionAuthGuard from '@/app/lib/SessionAuthGuard';
-import styles from '@/app/components/HousesMapPage.module.css';
+import styles from '@/app/components/ListingsPageComponents/HousesMapPage.module.css';
 
 export const runtime = 'nodejs';
 

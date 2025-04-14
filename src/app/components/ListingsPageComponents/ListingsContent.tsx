@@ -6,7 +6,7 @@ import { functions } from '@/app/firebase/firebaseConfig';
 import HouseGridWrapper from '@/app/components/ListingsPageComponents/HouseGridWrapper';
 import ClientMapWrapper from '@/app/components/ListingsPageComponents/ClientMapWrapper';
 import FiltersWrapper from '@/app/components/ListingsPageComponents/FiltersWrapper';
-import styles from '@/app/components/HousesMapPage.module.css';
+import styles from '@/app/components/ListingsPageComponents/HousesMapPage.module.css';
 import { House } from '@/app/types/house';
 export default function ListingsContent() {
   const [houses, setHouses] = useState<House[]>([]);
