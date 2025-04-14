@@ -1,25 +1,26 @@
+// src/app/forgot-password.tsx
 'use client';
 
-import { useState, FormEvent } from 'react';
-import { sendPasswordResetEmail } from 'firebase/auth';
-import { auth } from '@/app/firebase/firebaseClient';
+import { useState, FormEvent } from "react";
+import { sendPasswordResetEmail } from "firebase/auth";
+import { auth } from "@/app/firebase/firebaseClient";
 
 export default function ForgotPassword() {
-  const [email, setEmail] = useState('');
-  const [message, setMessage] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [email, setEmail] = useState<string>("");
+  const [infoMessage, setInfoMessage] = useState<string>("");
+  const [error, setError] = useState<string>("");
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setMessage(null);
-    setError(null);
+    setError("");
+    setInfoMessage("");
 
     try {
       await sendPasswordResetEmail(auth, email);
-      setMessage('Password reset email sent. Please check your inbox.');
+      setInfoMessage("Password reset email sent! Please check your inbox.");
     } catch (err) {
-      console.error('Error sending password reset email:', err);
-      setError('Failed to send password reset email. Please try again.');
+      console.error("Forgot Password error:", err);
+      setError("Error sending password reset email. Please try again.");
     }
   };
 
@@ -28,26 +29,26 @@ export default function ForgotPassword() {
       <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md w-96">
         <h2 className="text-2xl font-bold mb-4 text-center">Forgot Password</h2>
 
-        {message && <p className="text-green-500 text-center mb-2">{message}</p>}
         {error && <p className="text-red-500 text-center mb-2">{error}</p>}
+        {infoMessage && <p className="text-green-500 text-center mb-2">{infoMessage}</p>}
 
-        <label className="block mb-2 font-medium">Email</label>
+        <label className="block mb-2 font-medium">Enter your email address</label>
         <input
           type="email"
-          className="w-full p-2 border rounded mb-4"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
+          className="w-full p-2 border rounded mb-4"
         />
 
         <button
           type="submit"
           className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
         >
-          Send Reset Email
+          Reset Password
         </button>
 
-        <p className="text-center mt-4 text-sm">
+        <p className="mt-4 text-center text-sm">
           Remember your password?{" "}
           <a href="/login" className="text-blue-600 hover:underline">
             Log in
