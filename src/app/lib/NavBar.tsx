@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { auth } from '@/app/firebase/firebaseClient';
 import { onAuthStateChanged, User } from 'firebase/auth';
-import styles from '@/app/components/NavBar.module.css';
+import styles from '@/app/components/DetailsPageComponents/NavBar.module.css';
 import { Poppins } from 'next/font/google';
 
 const poppins = Poppins({

@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from '@/app/components/propertyDetails.module.css';
+import styles from '@/app/components/DetailsPageComponents/propertyDetails.module.css';
 type PropertyDetailsProps = {
   property: {
     category?: string;

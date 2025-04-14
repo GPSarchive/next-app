@@ -1,27 +1,29 @@
+
 export type House = {
-    id: string;
-    title: string;
-    price: string;
-    description?: string;
-    images: { src: string; alt?: string }[];
-    location?: {
-      latitude: number;
-      longitude: number;
-    };
-    latitude?: number;
-    longitude?: number;
-    category?: string;
-    size?: string;
-    bedrooms?: number;
-    parking?: string;
-    floor?: string;
-    energyClass?: string;
-    yearBuilt?: string;
-    kitchens?: string;
-    heatingType?: string;
-    specialFeatures?: string;
-    windowType?: string;
-    hasHeating?: string;
-    suitableFor?: string;
-    [key: string]: any;
+  id: string;
+  title: string;
+  description: string;
+  price: string;
+  category: string;
+  bedrooms: number;
+  kitchens: string;
+  floor: string;
+  size: string;
+  yearBuilt: string;
+  windowType: string;
+  energyClass: string;
+  hasHeating: string;
+  heatingType: string;
+  parking: string;
+  suitableFor: string;
+  specialFeatures: string;
+  location: {
+    latitude: number;
+    longitude: number;
   };
+  images: {
+    src: string;
+    alt: string;
+  }[];
+};
+  

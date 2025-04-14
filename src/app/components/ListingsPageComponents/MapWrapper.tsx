@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import MapComponent from "@/app/components/MapComponent";
+import MapComponent from "@/app/components/ListingsPageComponents/MapComponent";
 
 // =======================
 // Types

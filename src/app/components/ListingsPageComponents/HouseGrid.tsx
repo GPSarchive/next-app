@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, Variants } from "framer-motion";
-import HouseCarousel from "@/app/components/HouseCarousel";
+import HouseCarousel from "@/app/components/ListingsPageComponents/HouseCarousel";
 
 // =======================
 // Types

@@ -1,7 +1,7 @@
 'use client';
 
 import { House } from '@/app/types/house';
-import MapWrapper from '@/app/components/MapWrapper';
+import MapWrapper from '@/app/components/ListingsPageComponents/MapWrapper';
 
 interface ClientMapWrapperProps {
   houses: House[];

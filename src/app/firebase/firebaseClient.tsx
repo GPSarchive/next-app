@@ -12,12 +12,6 @@ console.log('Firebase config:', firebaseConfig);
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 const auth = getAuth(app);
 
-if (
-  typeof window !== 'undefined' &&
-  process.env.NEXT_PUBLIC_EMULATORS === 'true'
-) {
-  console.log('🔌 Connecting to Firebase Auth Emulator...');
-  connectAuthEmulator(auth, 'http://localhost:9099', { disableWarnings: true });
-}
+
 
 export { app, auth };
