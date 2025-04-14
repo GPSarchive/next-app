@@ -36,9 +36,9 @@ export default async function PropertyPage({ params }) {
   }
 
   return (
-    <>
+    <SessionAuthGuard>
       <NavBar />
       <DetailsContent property={property} />
-    </>
+    </SessionAuthGuard>
   );
 }

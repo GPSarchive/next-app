@@ -6,7 +6,15 @@ import { signInWithEmailAndPassword } from 'firebase/auth';
 
 export async function login(email: string, password: string) {
   const userCredential = await signInWithEmailAndPassword(auth, email, password);
-  const token = await userCredential.user.getIdToken();
+  const user = userCredential.user;
+
+  // ✅ Check email verification
+  if (!user.emailVerified) {
+    throw new Error('email-not-verified');
+  }
+
+  // ✅ Proceed with session creation
+  const token = await user.getIdToken();
 
   const res = await fetch('/api/session', {
     method: 'POST',

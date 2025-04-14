@@ -19,24 +19,27 @@ export default function Login() {
       console.log('🟦 Attempting login with:', email);
       await login(email, password); // ✅ Using shared login logic
       console.log('✅ Session stored, redirecting...');
+      
       router.push('/listings');
     } catch (err: any) {
       console.error('❌ Login error:', err);
-
+    
       let friendlyMessage = 'Unknown error occurred';
-
+    
       if (err.code === 'auth/user-not-found') {
         friendlyMessage = 'No user found with that email.';
       } else if (err.code === 'auth/wrong-password') {
         friendlyMessage = 'Incorrect password.';
       } else if (err.code === 'auth/invalid-email') {
         friendlyMessage = 'Invalid email format.';
+      } else if (err.message === 'email-not-verified') {
+        friendlyMessage = 'Your email is not verified. Please check your inbox.';
       } else if (err.message?.includes('Token issue')) {
         friendlyMessage = 'Token issue: server couldn’t verify.';
       }
-
+    
       setError(`❌ ${friendlyMessage}`);
-    }
+    }    
   };
 
   return (
