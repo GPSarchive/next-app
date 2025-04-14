@@ -37,7 +37,7 @@ export default function ListingsContent() {
   return (
     <div className={styles.content}>
       <div className={styles.leftPanel}>
-        <FiltersWrapper resultsCount={houses.length} />
+        
         <div>
           <h2>Public Listings</h2>
           <HouseGridWrapper houses={publicHouses} />
