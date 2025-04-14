@@ -2,7 +2,7 @@
 
 import React, { useState, useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
-import styles from '@/app/components/DetailsPageComponents/propertyDescription.module.css';
+import styles from '@/app/components/DetailsPageComponents/PropertyDescription.module.css';
 
 type PropertyDescriptionProps = {
   description: string;

@@ -5,7 +5,7 @@ import Gallery from '@/app/components/DetailsPageComponents/Gallery';
 import PropertyDetails from '@/app/components/DetailsPageComponents/PropertyDetails';
 import PropertyDescription from '@/app/components/DetailsPageComponents/PropertyDescription';
 import DetailsMap from '@/app/components/DetailsPageComponents/DetailsMap';
-import styles from '@/app/components/PropertyPage.module.css';
+import styles from '@/app/components/DetailsPageComponents/PropertyPage.module.css';
 
 export default function DetailsContent({ property }) {
   return (
