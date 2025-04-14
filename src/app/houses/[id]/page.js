@@ -16,7 +16,9 @@ export default async function PropertyPage({ params }) {
   try {
     const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/houses/${id}`, {
       method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+      },
     });
 
     if (!response.ok) {
@@ -24,7 +26,7 @@ export default async function PropertyPage({ params }) {
         console.warn('❌ House not found:', id);
         notFound();
       }
-      throw new Error('Failed to fetch house data');
+      throw new Error(`Failed to fetch house data: ${response.status} ${response.statusText}`);
     }
 
     property = await response.json();

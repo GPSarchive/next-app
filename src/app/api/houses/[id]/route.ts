@@ -2,8 +2,11 @@ import { NextResponse } from 'next/server';
 import { getFirebaseAdminDB } from '@/app/lib/firebaseAdmin';
 import { House } from '@/app/types/house';
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
-  const { id } = params;
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
 
   const db = getFirebaseAdminDB();
   if (!db) {
@@ -22,8 +25,8 @@ export async function GET(request: Request, { params }: { params: { id: string }
 
     const property: House = { id: snapshot.id, ...snapshot.data() } as House;
 
-    const latitude = property.location.latitude || property.location?.latitude;
-    const longitude = property.location.longitude || property.location?.longitude;
+    const latitude = property.location?.latitude;
+    const longitude = property.location?.longitude;
 
     if (typeof latitude !== 'number' || typeof longitude !== 'number') {
       console.warn('❌ Invalid lat/lng for house');
