@@ -1,23 +1,12 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import MapComponent from "@/app/components/ListingsPageComponents/MapComponent";
+import dynamic from 'next/dynamic';
+import { useState } from 'react';
+import { House } from '@/app/types/house';
 
-// =======================
-// Types
-// =======================
-
-type House = {
-  id: string;
-  title: string;
-  price: string;
-  images: { src: string }[];
-  location?: {
-    latitude: number;
-    longitude: number;
-  };
-  [key: string]: any;
-};
+const MapComponent = dynamic(() => import('@/app/components/ListingsPageComponents/MapComponent'), {
+  ssr: false,
+});
 
 type ViewState = {
   longitude: number;
@@ -30,10 +19,6 @@ type ViewState = {
 type Props = {
   houses: House[];
 };
-
-// =======================
-// Component
-// =======================
 
 export default function MapWrapper({ houses }: Props) {
   const [viewState, setViewState] = useState<ViewState>({
@@ -50,7 +35,7 @@ export default function MapWrapper({ houses }: Props) {
       setViewState={setViewState}
       houses={houses}
       selectedHouse={selectedHouse}
-      setSelectedHouse={setSelectedHouse}
+      setSelectedHouse={(house) => setSelectedHouse(house)} // ✅ key line
     />
   );
 }

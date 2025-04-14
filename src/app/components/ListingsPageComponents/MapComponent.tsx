@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useState } from "react";
 import Map, {
@@ -12,6 +12,7 @@ import Map, {
 import "maplibre-gl/dist/maplibre-gl.css";
 import { SlLocationPin } from "react-icons/sl";
 import Image from "next/image";
+import { House } from '@/app/types/house';
 
 // =======================
 // Types
@@ -22,13 +23,8 @@ type Location = {
   longitude: number;
 };
 
-type House = {
-  id: string;
-  title: string;
-  price: string;
-  location?: Location;
-  images: { src: string }[];
-};
+
+
 
 type ViewState = {
   longitude: number;
@@ -63,15 +59,15 @@ const MapComponent = ({
     <div className="w-full h-full relative">
       <Map
         {...viewState}
-        onMove={(evt: ViewStateChangeEvent) => setViewState(evt.viewState)}
+        mapStyle="/alidade_smooth_custom.json"
+        style={{ width: "100%", height: "100%" }}
         attributionControl={{ compact: true }}
         onLoad={() => setMapLoaded(true)}
-        style={{ width: "100%", height: "100%" }}
-        mapStyle='/alidade_smooth_custom.json'
+        onMove={(evt: ViewStateChangeEvent) => setViewState(evt.viewState)}
       >
         <NavigationControl position="top-right" />
 
-        {/* ✅ House Markers */}
+        {/* ✅ Markers */}
         {houses.map((house) =>
           house.location?.latitude && house.location?.longitude ? (
             <Marker
@@ -88,33 +84,35 @@ const MapComponent = ({
           ) : null
         )}
 
-        {/* ✅ Popup */}
+        {/* ✅ Popup for selected house */}
         {selectedHouse &&
           selectedHouse.location?.latitude &&
           selectedHouse.location?.longitude && (
             <Popup
               longitude={selectedHouse.location.longitude}
               latitude={selectedHouse.location.latitude}
-              closeButton={true}
+              closeButton
               closeOnClick={false}
               onClose={() => setSelectedHouse(null)}
               anchor="top"
             >
-              <div className="p-0 bg-white shadow-lg rounded-md text-black w-50">
+              <div className="p-0 bg-white shadow-lg rounded-md text-black w-[200px]">
                 <Image
                   src={selectedHouse.images[0]?.src || "/placeholder.jpg"}
                   width={200}
                   height={100}
                   alt={selectedHouse.title}
-                  className="w-50 h-32 object-cover rounded-md"
+                  className="w-full h-32 object-cover rounded-md"
                 />
-                <h3 className="text-lg font-semibold mt-2">{selectedHouse.title}</h3>
-                <p className="text-gray-600">{selectedHouse.price}</p>
+                <div className="p-2">
+                  <h3 className="text-lg font-semibold">{selectedHouse.title}</h3>
+                  <p className="text-gray-600">{selectedHouse.price}</p>
+                </div>
               </div>
             </Popup>
           )}
 
-        {/* ✅ Tile Layer */}
+        {/* ✅ Custom Raster Layer */}
         {mapLoaded && (
           <Source
             id="stadiamaps-tiles"
@@ -139,7 +137,6 @@ const MapComponent = ({
           >
             <Layer
               id="3d-buildings"
-              source="mapbox-buildings"
               source-layer="building"
               type="fill-extrusion"
               minzoom={15}
