@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import FiltersBar from "@/app/components/FiltersBar";
+import FiltersBar from "@/app/components/ListingsPageComponents/FiltersBar";
 
 // =======================
 // Types

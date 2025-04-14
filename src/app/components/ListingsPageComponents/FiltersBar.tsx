@@ -1,4 +1,4 @@
-import styles from "@/app/components/FiltersBar.module.css";
+import styles from "@/app/components/ListingsPageComponents/filtersBar.module.css";
 import { FaSlidersH, FaMap } from "react-icons/fa";
 
 // =======================

@@ -6,7 +6,13 @@ import Map, { Marker, NavigationControl, Source, Layer } from 'react-map-gl/mapl
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { SlLocationPin } from 'react-icons/sl';
 
-export default function DetailsMap({ latitude, longitude, title }) {
+interface DetailsMapProps {
+  latitude: number;
+  longitude: number;
+  title: string;
+}
+
+export default function DetailsMap({ latitude, longitude, title }: DetailsMapProps) {
   const [mapLoaded, setMapLoaded] = useState(false);
 
   const viewState = {

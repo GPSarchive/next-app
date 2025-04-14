@@ -8,7 +8,7 @@ import Slider, { Settings as SlickSettings } from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 
-import styles from '@/app/components/HouseCarousel.module.css';
+import styles from '@/app/components/ListingsPageComponents/HouseCarousel.module.css';
 
 type HouseImage = {
   src: string;
