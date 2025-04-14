@@ -1,4 +1,3 @@
-
 export type House = {
   id: string;
   title: string;
@@ -17,6 +16,8 @@ export type House = {
   parking: string;
   suitableFor: string;
   specialFeatures: string;
+  latitude: number;
+  longitude: number;
   location: {
     latitude: number;
     longitude: number;
@@ -25,5 +26,6 @@ export type House = {
     src: string;
     alt: string;
   }[];
+  isPublic: boolean;
+  allowedUsers: string[];
 };
-  

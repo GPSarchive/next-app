@@ -3,55 +3,6 @@ import * as admin from "firebase-admin";
 
 admin.initializeApp();
 
-export const getHouses = functions.https
-  .onCall(async (request: functions.https.CallableRequest) => {
-    try {
-      console.log("[getHouses] Incoming request...");
-      // 1. Verify App Check
-      if (!request.app) {
-        throw new functions.https
-          .HttpsError("failed-precondition", "Missing App Check token.");
-      }
-      // 2. Check if user is authenticated
-      if (!request.auth) {
-        throw new functions.https
-          .HttpsError("unauthenticated", "User must be authenticated.");
-      }
-      // 3. Check user tier
-      const userTier = request.auth.token.role;
-      console.log("[getHouses] User tier:", userTier);
-      if (userTier !== "admin" && userTier !== "premium") {
-        throw new functions.https
-          .HttpsError("permission-denied", "Insufficient privileges.");
-      }
-      // 4. Query the Firestore houses collection
-      const snapshot = await admin.firestore()
-        .collection("houses").get();
-      const houses = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      console
-        .log("[getHouses] Returning", houses.length, "houses.");
-      return {houses};
-    } catch (error) {
-      console.error("[getHouses] Error:", error);
-      if (error instanceof functions.https.HttpsError) {
-        throw error;
-      } else {
-        throw new functions.https
-          .HttpsError("internal", "Internal server error.");
-      }
-    }
-  });
-
-
-// ---------------------------------------------------------
-// verifySession: Callable Function for session validation
-// ---------------------------------------------------------
-interface VerifySessionData {
-  sessionCookie: string;
-}
 
 interface VerifySessionResponse {
   status: "authorized" | "unauthenticated" | "unauthorized" | "error";
@@ -60,26 +11,67 @@ interface VerifySessionResponse {
   message?: string;
 }
 
-export const verifySession = functions.https.onCall(
-  async (
-    data: functions.https.CallableRequest<VerifySessionData>
-  ): Promise<VerifySessionResponse> => {
-    const sessionCookie = data.data.sessionCookie;
 
+// getHouses function
+export const getHouses = functions.https.onCall(
+  async (request: functions.https.CallableRequest) => {
+    if (!request.app) {
+      throw new functions.https
+        .HttpsError("failed-precondition", "Missing App Check token.");
+    }
+    try {
+      let allDocs = [];
+      if (!request.auth) {
+        // Non-authenticated: get public houses
+        const snapshot = await admin.firestore()
+          .collection("houses").where("isPublic", "==", true).get();
+        allDocs = snapshot.docs;
+      } else {
+        const userRole = request.auth.token.role;
+        if (userRole === "admin") {
+          // Admins get all houses
+          const snapshot = await admin.firestore().collection("houses")
+            .get();
+          allDocs = snapshot.docs;
+        } else {
+          // Authenticated non-admin: get public + allowed private houses
+          const publicSnapshot = await admin.firestore()
+            .collection("houses").where("isPublic", "==", true).get();
+          const privateSnapshot = await admin.firestore()
+            .collection("houses")
+            .where("allowedUsers", "array-contains", request.auth.uid)
+            .get();
+          allDocs = [...publicSnapshot.docs, ...privateSnapshot.docs];
+        }
+      }
+      return allDocs.map((doc) => ({id: doc.id, ...doc.data()}));
+    } catch (error) {
+      console.error("[getHouses] Error:", error);
+      throw new functions.https
+        .HttpsError("internal", "Internal server error.");
+    }
+  }
+);
+
+// verifySession function
+export const verifySession = functions.https.onCall(
+  async (request: functions.https.CallableRequest):
+  Promise<VerifySessionResponse> => {
+    if (!request.app) {
+      throw new functions.https
+        .HttpsError("failed-precondition", "Missing App Check token.");
+    }
+    const sessionCookie = request.data.sessionCookie;
     if (!sessionCookie) {
       return {status: "unauthenticated", redirectTo: "/login"};
     }
-
     try {
-      const decodedClaims = await admin
-        .auth()
+      const decodedClaims = await admin.auth()
         .verifySessionCookie(sessionCookie, true);
       const userRole = decodedClaims.role;
-
-      if (!userRole || (userRole !== "premium" && userRole !== "admin")) {
+      if (!userRole || userRole !== "admin") {
         return {status: "unauthorized", redirectTo: "/unauthorized"};
       }
-
       return {status: "authorized", role: userRole};
     } catch (error) {
       console.error("Error verifying session cookie:", error);
@@ -88,6 +80,75 @@ export const verifySession = functions.https.onCall(
         redirectTo: "/login",
         message: error instanceof Error ? error.message : "Unknown error",
       };
+    }
+  }
+);
+
+// addHouse function
+export const addHouse = functions.https.onCall(
+  async (request: functions.https.CallableRequest) => {
+    if (!request.app) {
+      throw new functions
+        .https.HttpsError("failed-precondition", "Missing App Check token.");
+    }
+    if (!request.auth || request.auth.token.role !== "admin") {
+      throw new functions
+        .https.HttpsError("permission-denied", "Only admins can add houses.");
+    }
+    try {
+      const docRef = await admin
+        .firestore().collection("houses").add(request.data);
+      return {id: docRef.id};
+    } catch (error) {
+      console.error("Error adding house:", error);
+      throw new functions.https.HttpsError("internal", "Failed to add house.");
+    }
+  }
+);
+
+// updateHouse function
+export const updateHouse = functions.https.onCall(
+  async (request: functions.https.CallableRequest) => {
+    if (!request.app) {
+      throw new functions
+        .https.HttpsError("failed-precondition", "Missing App Check token.");
+    }
+    if (!request.auth || request.auth.token.role !== "admin") {
+      throw new functions
+        .https
+        .HttpsError("permission-denied", "Only admins can update houses.");
+    }
+    try {
+      const {id, ...houseData} = request.data;
+      await admin.firestore().collection("houses").doc(id).update(houseData);
+      return {success: true};
+    } catch (error) {
+      console.error("Error updating house:", error);
+      throw new functions
+        .https.HttpsError("internal", "Failed to update house.");
+    }
+  }
+);
+
+// deleteHouse function
+export const deleteHouse = functions.https.onCall(
+  async (request: functions.https.CallableRequest) => {
+    if (!request.app) {
+      throw new functions
+        .https.HttpsError("failed-precondition", "Missing App Check token.");
+    }
+    if (!request.auth || request.auth.token.role !== "admin") {
+      throw new functions.https
+        .HttpsError("permission-denied", "Only admins can delete houses.");
+    }
+    try {
+      const {id} = request.data;
+      await admin.firestore().collection("houses").doc(id).delete();
+      return {success: true};
+    } catch (error) {
+      console.error("Error deleting house:", error);
+      throw new functions
+        .https.HttpsError("internal", "Failed to delete house.");
     }
   }
 );

@@ -8,6 +8,7 @@ import ClientMapWrapper from '@/app/components/ListingsPageComponents/ClientMapW
 import FiltersWrapper from '@/app/components/ListingsPageComponents/FiltersWrapper';
 import styles from '@/app/components/ListingsPageComponents/HousesMapPage.module.css';
 import { House } from '@/app/types/house';
+
 export default function ListingsContent() {
   const [houses, setHouses] = useState<House[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -29,11 +30,24 @@ export default function ListingsContent() {
 
   if (error) return <div>Error: {error}</div>;
 
+  // Separate houses into public and private
+  const publicHouses = houses.filter(h => h.isPublic);
+  const privateHouses = houses.filter(h => !h.isPublic);
+
   return (
     <div className={styles.content}>
       <div className={styles.leftPanel}>
         <FiltersWrapper resultsCount={houses.length} />
-        <HouseGridWrapper houses={houses} />
+        <div>
+          <h2>Public Listings</h2>
+          <HouseGridWrapper houses={publicHouses} />
+        </div>
+        {privateHouses.length > 0 && (
+          <div>
+            <h2>Private Listings</h2>
+            <HouseGridWrapper houses={privateHouses} />
+          </div>
+        )}
       </div>
       <div className={styles.rightPanel}>
         <ClientMapWrapper houses={houses} />
