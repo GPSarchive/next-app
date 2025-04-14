@@ -25,14 +25,17 @@ export async function GET(
 
     const property: House = { id: snapshot.id, ...snapshot.data() } as House;
 
-    const latitude = property.location?.latitude;
-    const longitude = property.location?.longitude;
-
-    if (typeof latitude !== 'number' || typeof longitude !== 'number') {
+    const rawLat = property.location?.latitude;
+    const rawLng = property.location?.longitude;
+    
+    const latitude = typeof rawLat === 'string' ? parseFloat(rawLat) : rawLat;
+    const longitude = typeof rawLng === 'string' ? parseFloat(rawLng) : rawLng;
+    
+    if (typeof latitude !== 'number' || typeof longitude !== 'number' || isNaN(latitude) || isNaN(longitude)) {
       console.warn('❌ Invalid lat/lng for house');
       return NextResponse.json({ error: 'Invalid house data' }, { status: 400 });
     }
-
+    
     const responseData = {
       id: property.id,
       title: property.title,
