@@ -1,3 +1,4 @@
+// app/components/ListingsPageComponents/ListingsContent.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -19,10 +20,11 @@ export default function ListingsContent() {
         const getHouses = httpsCallable(functions, 'getHouses');
         const result = await getHouses();
         const data = result.data as { houses: House[] };
-        setHouses(data.houses);
+        setHouses(data.houses || []); // Ensure houses is an array
       } catch (err: any) {
         console.error('Error fetching houses:', err);
-        setError(err.message || 'An error occurred');
+        setError(err.message || 'An error occurred while fetching houses');
+        setHouses([]); // Fallback to empty array
       }
     }
     fetchHouses();
@@ -30,14 +32,14 @@ export default function ListingsContent() {
 
   if (error) return <div>Error: {error}</div>;
 
-  // Separate houses into public and private
-  const publicHouses = houses.filter(h => h.isPublic);
-  const privateHouses = houses.filter(h => !h.isPublic);
+  // Add null check before filtering
+  const publicHouses = houses ? houses.filter(h => h.isPublic) : [];
+  const privateHouses = houses ? houses.filter(h => !h.isPublic) : [];
 
   return (
     <div className={styles.content}>
       <div className={styles.leftPanel}>
-        
+        <FiltersWrapper resultsCount={houses.length} />
         <div>
           <h2>Public Listings</h2>
           <HouseGridWrapper houses={publicHouses} />
