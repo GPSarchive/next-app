@@ -19,8 +19,12 @@ export default function ListingsContent() {
       try {
         const getHouses = httpsCallable(functions, 'getHouses');
         const result = await getHouses();
-        const data = result.data as { houses: House[] };
-        setHouses(data.houses || []); // Ensure houses is an array
+        if (Array.isArray(result.data)) {
+          setHouses(result.data as House[]);
+        } else {
+          console.error('Expected an array from getHouses, got:', result.data);
+          setHouses([]);
+        }
       } catch (err: any) {
         console.error('Error fetching houses:', err);
         setError(err.message || 'An error occurred while fetching houses');

@@ -15,40 +15,60 @@ interface VerifySessionResponse {
 // getHouses function
 export const getHouses = functions.https.onCall(
   async (request: functions.https.CallableRequest) => {
+    console.log("[getHouses] Function called. App Check:",
+      !!request.app, "Auth:", !!request.auth);
+    if (request.auth) {
+      console.log("[getHouses] User UID:", request.auth.uid,
+        "Role:", request.auth.token.role);
+    }
     if (!request.app) {
-      throw new functions.https
+      console.log("[getHouses] Missing App Check token.");
+      throw new functions
+        .https
         .HttpsError("failed-precondition", "Missing App Check token.");
     }
     try {
       let allDocs = [];
       if (!request.auth) {
-        // Non-authenticated: get public houses
+        console
+          .log("[getHouses] Non-authenticated request: fetching houses.");
         const snapshot = await admin.firestore()
           .collection("houses").where("isPublic", "==", true).get();
+        console.log("[getHouses] Fetched", snapshot.size, "pub houses.");
         allDocs = snapshot.docs;
       } else {
         const userRole = request.auth.token.role;
         if (userRole === "admin") {
-          // Admins get all houses
-          const snapshot = await admin.firestore().collection("houses")
-            .get();
+          console.log("[getHouses] Admin request: fetching all houses.");
+          const snapshot = await admin.firestore().collection("houses").get();
+          console.log("[getHouses] Fetched", snapshot.size, "houses (admin).");
           allDocs = snapshot.docs;
         } else {
-          // Authenticated non-admin: get public + allowed private houses
-          const publicSnapshot = await admin.firestore()
-            .collection("houses").where("isPublic", "==", true).get();
-          const privateSnapshot = await admin.firestore()
-            .collection("houses")
-            .where("allowedUsers", "array-contains", request.auth.uid)
-            .get();
+          console.log("[getHouses] Authenticated non-admin  1", request
+            .auth.uid);
+          const publicSnapshot = await admin
+            .firestore().collection("houses")
+            .where("isPublic", "==", true).get();
+          console.log("[getHouses] Fetched", publicSnapshot.size, "pubhouses.");
+          const privateSnapshot = await admin
+            .firestore().collection("houses")
+            .where("allowedUsers", "array-contains", request.auth.uid).get();
+          console.log("[getHouses] Fetched", privateSnapshot
+            .size, "private houses for UID:", request.auth.uid);
           allDocs = [...publicSnapshot.docs, ...privateSnapshot.docs];
         }
       }
-      return allDocs.map((doc) => ({id: doc.id, ...doc.data()}));
+      const houses = allDocs
+        .map((doc) => ({id: doc.id, ...doc.data()}));
+      console.log("[getHouses] Returning", houses.length, "houses.");
+      return houses;
     } catch (error) {
       console.error("[getHouses] Error:", error);
-      throw new functions.https
-        .HttpsError("internal", "Internal server error.");
+      if (error instanceof Error) {
+        console.error("[getHouses] Error stack:", error.stack);
+      }
+      throw new functions
+        .https.HttpsError("internal", "Internal server error.");
     }
   }
 );
