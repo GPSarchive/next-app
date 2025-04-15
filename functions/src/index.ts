@@ -3,7 +3,6 @@ import * as admin from "firebase-admin";
 
 admin.initializeApp();
 
-
 interface VerifySessionResponse {
   status: "authorized" | "unauthenticated" | "unauthorized" | "error";
   redirectTo?: string;
@@ -11,55 +10,47 @@ interface VerifySessionResponse {
   message?: string;
 }
 
-
-// getHouses function
 export const getHouses = functions.https.onCall(
   async (request: functions.https.CallableRequest) => {
-    console.log("[getHouses] Function called. App Check:",
-      !!request.app, "Auth:", !!request.auth);
+    console
+      .log("[gH] Function called. App Check:", !!request
+        .app, "Auth:", !!request.auth);
     if (request.auth) {
-      console.log("[getHouses] User UID:", request.auth.uid,
-        "Role:", request.auth.token.role);
+      console
+        .log("[getHouses] ID:", request.auth.uid, "Role:", request
+          .auth.token.role);
     }
     if (!request.app) {
       console.log("[getHouses] Missing App Check token.");
       throw new functions
-        .https
-        .HttpsError("failed-precondition", "Missing App Check token.");
+        .https.HttpsError("failed-precondition", "Missing App Check token.");
+    }
+    if (!request.auth) {
+      console.log("[getHouses] Non-authenticated request: unauthorized.");
+      throw new functions
+        .https.HttpsError("unauthenticated", "User must be authenticated.");
     }
     try {
-      let allDocs = [];
-      if (!request.auth) {
-        console
-          .log("[getHouses] Non-authenticated request: fetching houses.");
-        const snapshot = await admin.firestore()
-          .collection("houses").where("isPublic", "==", true).get();
-        console.log("[getHouses] Fetched", snapshot.size, "pub houses.");
-        allDocs = snapshot.docs;
+      let snapshot;
+      const userRole = request.auth.token.role;
+      if (userRole === "admin") {
+        console.log("[gH] Admin request: fetching all non-public houses.");
+        snapshot = await admin.firestore()
+          .collection("houses").where("isPublic", "==", false).get();
+        console.log("[gH] Fetched", snapshot
+          .size, "non-public houses (admin).");
       } else {
-        const userRole = request.auth.token.role;
-        if (userRole === "admin") {
-          console.log("[getHouses] Admin request: fetching all houses.");
-          const snapshot = await admin.firestore().collection("houses").get();
-          console.log("[getHouses] Fetched", snapshot.size, "houses (admin).");
-          allDocs = snapshot.docs;
-        } else {
-          console.log("[getHouses] Authenticated non-admin  1", request
-            .auth.uid);
-          const publicSnapshot = await admin
-            .firestore().collection("houses")
-            .where("isPublic", "==", true).get();
-          console.log("[getHouses] Fetched", publicSnapshot.size, "pubhouses.");
-          const privateSnapshot = await admin
-            .firestore().collection("houses")
-            .where("allowedUsers", "array-contains", request.auth.uid).get();
-          console.log("[getHouses] Fetched", privateSnapshot
-            .size, "private houses for UID:", request.auth.uid);
-          allDocs = [...publicSnapshot.docs, ...privateSnapshot.docs];
-        }
+        console
+          .log("[getHouses]Authenticatednon-adminrequest:fetch privateID:",
+            request.auth.uid);
+        snapshot = await admin.firestore().collection("houses")
+          .where("isPublic", "==", false)
+          .where("allowedUsers", "array-contains", request.auth.uid)
+          .get();
+        console.log("[gH] Fetched", snapshot.size, "private houses for UID:",
+          request.auth.uid);
       }
-      const houses = allDocs
-        .map((doc) => ({id: doc.id, ...doc.data()}));
+      const houses = snapshot.docs.map((doc) => ({id: doc.id, ...doc.data()}));
       console.log("[getHouses] Returning", houses.length, "houses.");
       return houses;
     } catch (error) {
@@ -77,10 +68,6 @@ export const getHouses = functions.https.onCall(
 export const verifySession = functions.https.onCall(
   async (request: functions.https.CallableRequest):
   Promise<VerifySessionResponse> => {
-    if (!request.app) {
-      throw new functions.https
-        .HttpsError("failed-precondition", "Missing App Check token.");
-    }
     const sessionCookie = request.data.sessionCookie;
     if (!sessionCookie) {
       return {status: "unauthenticated", redirectTo: "/login"};

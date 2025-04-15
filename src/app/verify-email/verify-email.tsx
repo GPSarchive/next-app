@@ -19,7 +19,7 @@ export default function VerifyEmail() {
       if (auth.currentUser) {
         await auth.currentUser.reload();
         if (auth.currentUser.emailVerified) {
-          router.push("/dashboard"); // Redirect once verified
+          router.push("/home"); // Redirect once verified
         }
       }
     }, 3000); // Poll every 3 seconds
