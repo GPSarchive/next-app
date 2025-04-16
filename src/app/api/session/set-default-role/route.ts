@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Use environment variable to determine the role, defaulting to 'public'
-  const defaultRole = 'admin';
+  const defaultRole = 'public';
 
   try {
     await adminAuth.setCustomUserClaims(uid, { role: defaultRole });
