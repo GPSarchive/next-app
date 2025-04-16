@@ -181,35 +181,35 @@ export const getUsers = functions.https.onCall(
       .app, "Auth:", !!request.auth);
     if (request.auth) {
       console.log("[getUsers] User UID:", request.auth.uid,
-         "Role:", request.auth.token.role);
+        "Role:", request.auth.token.role);
     }
     if (!request.app) {
       console.log("[getUsers] Missing App Check token.");
-      throw new functions.https.HttpsError("failed-precondition", 
+      throw new functions.https.HttpsError("failed-precondition",
         "Missing App Check token.");
     }
     if (!request.auth || request.auth.token.role !== "admin") {
       console.log("[getUsers] Unauthorized request: not an admin.");
-      throw new functions.https.HttpsError("permission-denied", 
+      throw new functions.https.HttpsError("permission-denied",
         "Only admins can access user list.");
     }
     try {
       console.log("[getUsers] Fetching user list for admin.");
       const listUsersResult = await admin.auth().listUsers();
-      const users = listUsersResult.users.map(user => ({
+      const users = listUsersResult.users.map((user) => ({
         uid: user.uid,
         email: user.email || "",
         displayName: user.displayName || "",
       }));
       console.log("[getUsers] Fetched", users.length, "users.");
-      return { users };
+      return {users};
     } catch (error) {
       console.error("[getUsers] Error:", error);
       if (error instanceof Error) {
         console.error("[getUsers] Error stack:", error.stack);
       }
       throw new functions.https.HttpsError("internal",
-         "Failed to fetch users.");
+        "Failed to fetch users.");
     }
   }
 );

@@ -25,14 +25,31 @@ export default function AdminDashboard() {
         const getHouses = httpsCallable<void, { houses: House[] }>(functions, 'getHouses');
         const housesResult = await getHouses();
         console.log("[AdminDashboard] Houses result:", housesResult.data);
-        if (housesResult.data && Array.isArray(housesResult.data.houses)) {
-          setHouses(housesResult.data.houses);
+        let housesData: House[] = [];
+        if (Array.isArray(housesResult.data)) {
+          // Handle case where data is an array directly
+          housesData = housesResult.data.map(house => ({
+            ...house,
+            location: {
+              ...house.location,
+              longitude: Number(house.location.longitude),
+            },
+          }));
+        } else if (housesResult.data && Array.isArray(housesResult.data.houses)) {
+          // Handle case where data is { houses: [...] }
+          housesData = housesResult.data.houses.map(house => ({
+            ...house,
+            location: {
+              ...house.location,
+              longitude: Number(house.location.longitude),
+            },
+          }));
         } else {
           console.error("[AdminDashboard] Invalid houses data:", housesResult.data);
-          setHouses([]);
           setError("Failed to load houses: invalid data format.");
         }
-
+        setHouses(housesData);
+  
         const getUsers = httpsCallable<void, { users: User[] }>(functions, 'getUsers');
         const usersResult = await getUsers();
         console.log("[AdminDashboard] Users result:", usersResult.data);
@@ -54,7 +71,7 @@ export default function AdminDashboard() {
     }
     fetchData();
   }, []);
-
+  
   const saveHouse = async (house: House) => {
     try {
       if (house.id) {
