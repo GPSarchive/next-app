@@ -67,30 +67,35 @@ export const getHouses = functions.https.onCall(
 
 // verifySession function
 export const verifySession = functions.https.onCall(
-  async (request: functions.https.CallableRequest): Promise<VerifySessionResponse> => {
-    console.log("verifySession: Received request with data:", request.data);
+  async (request: functions.https.CallableRequest):
+  Promise<VerifySessionResponse> => {
+    console.log("verifySession:Receivedrequestwithdata:",
+      request.data);
 
     const sessionCookie = request.data.sessionCookie;
     if (!sessionCookie) {
-      console.log("verifySession: No session cookie provided. Returning unauthenticated.");
-      return { status: "unauthenticated", redirectTo: "/login" };
+      console
+        .log("vS: NosessioncookieprovidedReturningunauthenticated.");
+      return {status: "unauthenticated", redirectTo: "/login"};
     }
-
     // For security, log only the first few characters of the session cookie.
-    console.log("verifySession: Received session cookie:", sessionCookie.substring(0, 20) + '...');
-
+    console.log("verifySession: Received session cookie:",
+      sessionCookie.substring(0, 20) + "...");
     try {
-      const decodedClaims = await admin.auth().verifySessionCookie(sessionCookie, true);
+      const decodedClaims = await admin.auth()
+        .verifySessionCookie(sessionCookie, true);
       console.log("verifySession: Decoded claims:", decodedClaims);
       const userRole = decodedClaims.role;
       if (!userRole || userRole !== "admin") {
         console.log("verifySession: User unauthorized, role:", userRole);
-        return { status: "unauthorized", redirectTo: "/unauthorized" };
+        return {status: "unauthorized", redirectTo: "/unauthorized"};
       }
-      console.log("verifySession: User authorized with role:", userRole);
-      return { status: "authorized", role: userRole };
+      console
+        .log("verifySession: User authorized with role:", userRole);
+      return {status: "authorized", role: userRole};
     } catch (error) {
-      console.error("verifySession: Error verifying session cookie:", error);
+      console
+        .error("verifySession: Error verifying session cookie:", error);
       return {
         status: "error",
         redirectTo: "/login",

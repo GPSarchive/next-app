@@ -1,3 +1,5 @@
+'use client';
+
 import { useState } from 'react';
 import { House } from '@/app/types/house';
 
@@ -15,40 +17,44 @@ interface HouseFormProps {
 }
 
 export default function HouseForm({ house, users, onSave, onCancel }: HouseFormProps) {
-  const [formData, setFormData] = useState<House>(house || {
-    id: '',
-    title: '',
-    description: '',
-    price: '',
-    bedrooms: 0,
-    category: '',
-    energyClass: '',
-    floor: '',
-    hasHeating: 'Yes',
-    heatingType: '',
-    kitchens: '1',
-    latitude: 0,
-    longitude: 0,
-    location: { latitude: 0, longitude: 0 },
-    parking: '',
-    size: '',
-    specialFeatures: '',
-    suitableFor: '',
-    windowType: '',
-    yearBuilt: '',
-    images: [],
-    isPublic: true,
-    allowedUsers: [],
-  });
+  const [formData, setFormData] = useState<House>(
+    house || {
+      id: '',
+      title: '',
+      description: '',
+      price: '',
+      bedrooms: 0,
+      category: '',
+      energyClass: '',
+      floor: '',
+      hasHeating: 'Yes',
+      heatingType: '',
+      kitchens: '1',
+      latitude: 0,
+      longitude: 0,
+      location: { latitude: 0, longitude: 0 },
+      parking: '',
+      size: '',
+      specialFeatures: '',
+      suitableFor: '',
+      windowType: '',
+      yearBuilt: '',
+      images: [],
+      isPublic: true,
+      allowedUsers: [],
+    }
+  );
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: checked,
       allowedUsers: name === 'isPublic' && checked ? [] : prev.allowedUsers,
@@ -63,11 +69,11 @@ export default function HouseForm({ house, users, onSave, onCancel }: HouseFormP
         selected.push(options[i].value);
       }
     }
-    setFormData(prev => ({ ...prev, allowedUsers: selected }));
+    setFormData((prev) => ({ ...prev, allowedUsers: selected }));
   };
 
   const handleImageChange = (index: number, field: 'src' | 'alt', value: string) => {
-    setFormData(prev => {
+    setFormData((prev) => {
       const newImages = [...prev.images];
       newImages[index] = { ...newImages[index], [field]: value };
       return { ...prev, images: newImages };
@@ -75,14 +81,14 @@ export default function HouseForm({ house, users, onSave, onCancel }: HouseFormP
   };
 
   const addImage = () => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       images: [...prev.images, { src: '', alt: '' }],
     }));
   };
 
   const removeImage = (index: number) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       images: prev.images.filter((_, i) => i !== index),
     }));
@@ -130,7 +136,14 @@ export default function HouseForm({ house, users, onSave, onCancel }: HouseFormP
       </label>
       <label>
         Has Heating:
-        <input type="checkbox" name="hasHeating" checked={formData.hasHeating === 'Yes'} onChange={e => setFormData(prev => ({ ...prev, hasHeating: e.target.checked ? 'Yes' : 'No' }))} />
+        <input
+          type="checkbox"
+          name="hasHeating"
+          checked={formData.hasHeating === 'Yes'}
+          onChange={(e) =>
+            setFormData((prev) => ({ ...prev, hasHeating: e.target.checked ? 'Yes' : 'No' }))
+          }
+        />
       </label>
       <label>
         Heating Type:
@@ -180,7 +193,7 @@ export default function HouseForm({ house, users, onSave, onCancel }: HouseFormP
         <label>
           Allowed Users:
           <select multiple name="allowedUsers" value={formData.allowedUsers} onChange={handleMultiSelectChange}>
-            {users.map(user => (
+            {users.map((user) => (
               <option key={user.uid} value={user.uid}>
                 {user.displayName || user.email}
               </option>
@@ -193,18 +206,24 @@ export default function HouseForm({ house, users, onSave, onCancel }: HouseFormP
         <div key={index}>
           <label>
             Image {index + 1} SRC:
-            <input type="text" value={image.src} onChange={e => handleImageChange(index, 'src', e.target.value)} />
+            <input type="text" value={image.src} onChange={(e) => handleImageChange(index, 'src', e.target.value)} />
           </label>
           <label>
             Image {index + 1} ALT:
-            <input type="text" value={image.alt} onChange={e => handleImageChange(index, 'alt', e.target.value)} />
+            <input type="text" value={image.alt} onChange={(e) => handleImageChange(index, 'alt', e.target.value)} />
           </label>
-          <button type="button" onClick={() => removeImage(index)}>Remove</button>
+          <button type="button" onClick={() => removeImage(index)}>
+            Remove
+          </button>
         </div>
       ))}
-      <button type="button" onClick={addImage}>Add Image</button>
+      <button type="button" onClick={addImage}>
+        Add Image
+      </button>
       <button type="submit">Save</button>
-      <button type="button" onClick={onCancel}>Cancel</button>
+      <button type="button" onClick={onCancel}>
+        Cancel
+      </button>
     </form>
   );
 }
