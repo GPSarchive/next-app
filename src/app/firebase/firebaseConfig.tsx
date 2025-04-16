@@ -1,15 +1,10 @@
-// firebaseConfig.ts
 'use client';
 
 import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
-import {
-  getFirestore,
-  connectFirestoreEmulator,
-  initializeFirestore,
-} from 'firebase/firestore';
-import { getFunctions, connectFunctionsEmulator, Functions } from 'firebase/functions';
-import { initializeAppCheck, ReCaptchaV3Provider } from 'firebase/app-check';
+import { getAuth, Auth, connectAuthEmulator } from 'firebase/auth';
+import { getFirestore, Firestore, initializeFirestore } from 'firebase/firestore';
+import { getFunctions, Functions, connectFunctionsEmulator } from 'firebase/functions';
+import { initializeAppCheck, ReCaptchaV3Provider, AppCheck } from 'firebase/app-check';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY!,
@@ -22,18 +17,40 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID!,
 };
 
-const app: FirebaseApp = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+// Log config for debugging (optional)
+console.log('Firebase config:', firebaseConfig);
 
-// Initialize App Check
-initializeAppCheck(app, {
-  provider: new ReCaptchaV3Provider(process.env.NEXT_PUBLIC_FIREBASE_APPCHECK_KEY!),
-  isTokenAutoRefreshEnabled: true,
-});
+// Initialize Firebase app (only once)
+let app: FirebaseApp;
+if (!getApps().length) {
+  app = initializeApp(firebaseConfig);
+} else {
+  app = getApp();
+}
 
-// Initialize services.
-export const auth = getAuth(app);
-export const db = initializeFirestore(app, { experimentalForceLongPolling: true });
+// Initialize App Check (only once)
+let appCheckInstance: AppCheck | null = null;
+if (typeof window !== 'undefined' && !appCheckInstance) {
+  try {
+    console.log('Initializing App Check');
+    appCheckInstance = initializeAppCheck(app, {
+      provider: new ReCaptchaV3Provider(process.env.NEXT_PUBLIC_FIREBASE_APPCHECK_KEY!),
+      isTokenAutoRefreshEnabled: true,
+    });
+  } catch (error) {
+    console.error('Error initializing App Check:', error);
+  }
+}
+
+// Initialize services
+export const auth: Auth = getAuth(app);
+export const db: Firestore = initializeFirestore(app, { experimentalForceLongPolling: true });
 export const functions: Functions = getFunctions(app);
 
+// Optional: Connect to emulators for local development (uncomment if needed)
+// if (process.env.NODE_ENV === 'development') {
+//   connectAuthEmulator(auth, 'http://localhost:9099');
+//   connectFunctionsEmulator(functions, 'localhost', 5001);
+// }
 
 export default app;
