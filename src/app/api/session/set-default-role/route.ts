@@ -1,4 +1,4 @@
-// src/app/api/set-default-role/route.ts
+// src/app/api/session/set-default-role/route.ts
 import { getFirebaseAdminAuth } from '@/app/lib/firebaseAdmin';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Use environment variable to determine the role, defaulting to 'public'
-  const defaultRole = 'public';
+  const defaultRole = 'admin';
 
   try {
     await adminAuth.setCustomUserClaims(uid, { role: defaultRole });

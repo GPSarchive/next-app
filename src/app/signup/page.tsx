@@ -48,7 +48,7 @@ export default function SignUp() {
       setInfoMessage("A verification email has been sent. Please check your inbox.");
       setPolling(true); // ✅ start watching for email verification
 
-      const response = await fetch("/api/set-default-role", {
+      const response = await fetch("/api/session/set-default-role", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ uid: user.uid }),
