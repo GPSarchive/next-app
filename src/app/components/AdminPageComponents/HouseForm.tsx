@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { House } from '@/app/types/house';
+import styles from './HouseForm.module.css';
 
 interface User {
   uid: string;
@@ -45,9 +46,7 @@ export default function HouseForm({ house, users, onSave, onCancel }: HouseFormP
     }
   );
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
@@ -105,94 +104,106 @@ export default function HouseForm({ house, users, onSave, onCancel }: HouseFormP
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <label>
+    <form onSubmit={handleSubmit} className={styles.form}>
+      <label className={styles.label}>
         Title:
-        <input type="text" name="title" value={formData.title} onChange={handleChange} />
+        <input type="text" name="title" value={formData.title} onChange={handleChange} className={styles.input} />
       </label>
-      <label>
+
+      <label className={styles.label}>
         Description:
-        <textarea name="description" value={formData.description} onChange={handleChange} />
+        <textarea name="description" value={formData.description} onChange={handleChange} className={styles.textarea} />
       </label>
-      <label>
+
+      <label className={styles.label}>
         Price:
-        <input type="text" name="price" value={formData.price} onChange={handleChange} />
+        <input type="text" name="price" value={formData.price} onChange={handleChange} className={styles.input} />
       </label>
-      <label>
+
+      <label className={styles.label}>
         Bedrooms:
-        <input type="number" name="bedrooms" value={formData.bedrooms} onChange={handleChange} />
+        <input type="number" name="bedrooms" value={formData.bedrooms} onChange={handleChange} className={styles.number} />
       </label>
-      <label>
+
+      <label className={styles.label}>
         Category:
-        <input type="text" name="category" value={formData.category} onChange={handleChange} />
+        <input type="text" name="category" value={formData.category} onChange={handleChange} className={styles.input} />
       </label>
-      <label>
+
+      <label className={styles.label}>
         Energy Class:
-        <input type="text" name="energyClass" value={formData.energyClass} onChange={handleChange} />
+        <input type="text" name="energyClass" value={formData.energyClass} onChange={handleChange} className={styles.input} />
       </label>
-      <label>
+
+      <label className={styles.label}>
         Floor:
-        <input type="text" name="floor" value={formData.floor} onChange={handleChange} />
+        <input type="text" name="floor" value={formData.floor} onChange={handleChange} className={styles.input} />
       </label>
-      <label>
+
+      <label className={styles.label}>
         Has Heating:
-        <input
-          type="checkbox"
-          name="hasHeating"
-          checked={formData.hasHeating === 'Yes'}
-          onChange={(e) =>
-            setFormData((prev) => ({ ...prev, hasHeating: e.target.checked ? 'Yes' : 'No' }))
-          }
-        />
+        <input type="checkbox" name="hasHeating" checked={formData.hasHeating === 'Yes'} onChange={(e) => setFormData((prev) => ({ ...prev, hasHeating: e.target.checked ? 'Yes' : 'No' }))} className={styles.checkbox} />
       </label>
-      <label>
+
+      <label className={styles.label}>
         Heating Type:
-        <input type="text" name="heatingType" value={formData.heatingType} onChange={handleChange} />
+        <input type="text" name="heatingType" value={formData.heatingType} onChange={handleChange} className={styles.input} />
       </label>
-      <label>
+
+      <label className={styles.label}>
         Kitchens:
-        <input type="text" name="kitchens" value={formData.kitchens} onChange={handleChange} />
+        <input type="text" name="kitchens" value={formData.kitchens} onChange={handleChange} className={styles.input} />
       </label>
-      <label>
+
+      <label className={styles.label}>
         Latitude:
-        <input type="number" name="latitude" value={formData.latitude} onChange={handleChange} />
+        <input type="number" name="latitude" value={formData.latitude} onChange={handleChange} className={styles.number} />
       </label>
-      <label>
+
+      <label className={styles.label}>
         Longitude:
-        <input type="number" name="longitude" value={formData.longitude} onChange={handleChange} />
+        <input type="number" name="longitude" value={formData.longitude} onChange={handleChange} className={styles.number} />
       </label>
-      <label>
+
+      <label className={styles.label}>
         Parking:
-        <input type="text" name="parking" value={formData.parking} onChange={handleChange} />
+        <input type="text" name="parking" value={formData.parking} onChange={handleChange} className={styles.input} />
       </label>
-      <label>
+
+      <label className={styles.label}>
         Size:
-        <input type="text" name="size" value={formData.size} onChange={handleChange} />
+        <input type="text" name="size" value={formData.size} onChange={handleChange} className={styles.input} />
       </label>
-      <label>
+
+      <label className={styles.label}>
         Special Features:
-        <input type="text" name="specialFeatures" value={formData.specialFeatures} onChange={handleChange} />
+        <input type="text" name="specialFeatures" value={formData.specialFeatures} onChange={handleChange} className={styles.input} />
       </label>
-      <label>
+
+      <label className={styles.label}>
         Suitable For:
-        <input type="text" name="suitableFor" value={formData.suitableFor} onChange={handleChange} />
+        <input type="text" name="suitableFor" value={formData.suitableFor} onChange={handleChange} className={styles.input} />
       </label>
-      <label>
+
+      <label className={styles.label}>
         Window Type:
-        <input type="text" name="windowType" value={formData.windowType} onChange={handleChange} />
+        <input type="text" name="windowType" value={formData.windowType} onChange={handleChange} className={styles.input} />
       </label>
-      <label>
+
+      <label className={styles.label}>
         Year Built:
-        <input type="text" name="yearBuilt" value={formData.yearBuilt} onChange={handleChange} />
+        <input type="text" name="yearBuilt" value={formData.yearBuilt} onChange={handleChange} className={styles.input} />
       </label>
-      <label>
+
+      <label className={styles.label}>
         Is Public:
-        <input type="checkbox" name="isPublic" checked={formData.isPublic} onChange={handleCheckboxChange} />
+        <input type="checkbox" name="isPublic" checked={formData.isPublic} onChange={handleCheckboxChange} className={styles.checkbox} />
       </label>
+
       {!formData.isPublic && (
-        <label>
+        <label className={styles.label}>
           Allowed Users:
-          <select multiple name="allowedUsers" value={formData.allowedUsers} onChange={handleMultiSelectChange}>
+          <select multiple name="allowedUsers" value={formData.allowedUsers} onChange={handleMultiSelectChange} className={styles.select}>
             {users.map((user) => (
               <option key={user.uid} value={user.uid}>
                 {user.displayName || user.email}
@@ -201,29 +212,24 @@ export default function HouseForm({ house, users, onSave, onCancel }: HouseFormP
           </select>
         </label>
       )}
+
       <h3>Images</h3>
       {formData.images.map((image, index) => (
-        <div key={index}>
+        <div key={index} className={styles.imageRow}>
           <label>
-            Image {index + 1} SRC:
-            <input type="text" value={image.src} onChange={(e) => handleImageChange(index, 'src', e.target.value)} />
+            Src:
+            <input type="text" value={image.src} onChange={(e) => handleImageChange(index, 'src', e.target.value)} className={styles.input} />
           </label>
           <label>
-            Image {index + 1} ALT:
-            <input type="text" value={image.alt} onChange={(e) => handleImageChange(index, 'alt', e.target.value)} />
+            Alt:
+            <input type="text" value={image.alt} onChange={(e) => handleImageChange(index, 'alt', e.target.value)} className={styles.input} />
           </label>
-          <button type="button" onClick={() => removeImage(index)}>
-            Remove
-          </button>
+          <button type="button" onClick={() => removeImage(index)} className={styles.buttonRemoveImage}>Remove</button>
         </div>
       ))}
-      <button type="button" onClick={addImage}>
-        Add Image
-      </button>
-      <button type="submit">Save</button>
-      <button type="button" onClick={onCancel}>
-        Cancel
-      </button>
+      <button type="button" onClick={addImage} className={styles.buttonAddImage}>Add Image</button>
+      <button type="submit" className={styles.buttonSave}>Save</button>
+      <button type="button" onClick={onCancel} className={styles.buttonCancel}>Cancel</button>
     </form>
   );
 }

@@ -37,7 +37,7 @@ export const getHouses = functions.https.onCall(
       if (userRole === "admin") {
         console.log("[gH] Admin request: fetching all non-public houses.");
         snapshot = await admin.firestore()
-          .collection("houses").where("isPublic", "==", false).get();
+          .collection("houses").get();
         console.log("[gH] Fetched", snapshot
           .size, "non-public houses (admin).");
       } else {

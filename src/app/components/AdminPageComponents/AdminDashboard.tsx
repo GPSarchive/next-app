@@ -1,10 +1,9 @@
-'use client';
-
 import { useState, useEffect } from 'react';
 import { httpsCallable } from 'firebase/functions';
 import { functions } from '@/app/firebase/firebaseConfig';
 import { House } from '@/app/types/house';
 import HouseForm from '@/app/components/AdminPageComponents/HouseForm';
+import styles from './AdminDashboard.module.css';
 
 interface User {
   uid: string;
@@ -24,10 +23,9 @@ export default function AdminDashboard() {
       try {
         const getHouses = httpsCallable<void, { houses: House[] }>(functions, 'getHouses');
         const housesResult = await getHouses();
-        console.log("[AdminDashboard] Houses result:", housesResult.data);
+
         let housesData: House[] = [];
         if (Array.isArray(housesResult.data)) {
-          // Handle case where data is an array directly
           housesData = housesResult.data.map(house => ({
             ...house,
             location: {
@@ -36,7 +34,6 @@ export default function AdminDashboard() {
             },
           }));
         } else if (housesResult.data && Array.isArray(housesResult.data.houses)) {
-          // Handle case where data is { houses: [...] }
           housesData = housesResult.data.houses.map(house => ({
             ...house,
             location: {
@@ -45,23 +42,18 @@ export default function AdminDashboard() {
             },
           }));
         } else {
-          console.error("[AdminDashboard] Invalid houses data:", housesResult.data);
           setError("Failed to load houses: invalid data format.");
         }
         setHouses(housesData);
-  
+
         const getUsers = httpsCallable<void, { users: User[] }>(functions, 'getUsers');
         const usersResult = await getUsers();
-        console.log("[AdminDashboard] Users result:", usersResult.data);
         if (usersResult.data && Array.isArray(usersResult.data.users)) {
           setUsers(usersResult.data.users);
         } else {
-          console.error("[AdminDashboard] Invalid users data:", usersResult.data);
-          setUsers([]);
           setError("Failed to load users: invalid data format.");
         }
       } catch (err: any) {
-        console.error("[AdminDashboard] Error fetching data:", err);
         setError(err.message || 'An error occurred while fetching data.');
         setHouses([]);
         setUsers([]);
@@ -71,31 +63,26 @@ export default function AdminDashboard() {
     }
     fetchData();
   }, []);
-  
+
   const saveHouse = async (house: House) => {
     try {
       if (house.id) {
         const updateHouse = httpsCallable<House, { success: boolean }>(functions, 'updateHouse');
         await updateHouse(house);
-        console.log("[AdminDashboard] House updated:", house.id);
       } else {
         const addHouse = httpsCallable<House, { id: string }>(functions, 'addHouse');
         const result = await addHouse(house);
         house.id = result.data.id;
-        console.log("[AdminDashboard] House added:", house.id);
       }
       const getHouses = httpsCallable<void, { houses: House[] }>(functions, 'getHouses');
       const housesResult = await getHouses();
       if (housesResult.data && Array.isArray(housesResult.data.houses)) {
         setHouses(housesResult.data.houses);
       } else {
-        console.error("[AdminDashboard] Invalid houses data after save:", housesResult.data);
-        setHouses([]);
         setError("Failed to refresh houses after save.");
       }
       setEditingHouse(null);
     } catch (err: any) {
-      console.error("[AdminDashboard] Error saving house:", err);
       setError(err.message || 'An error occurred while saving the house.');
     }
   };
@@ -105,18 +92,14 @@ export default function AdminDashboard() {
       try {
         const deleteHouseFunc = httpsCallable<{ id: string }, { success: boolean }>(functions, 'deleteHouse');
         await deleteHouseFunc({ id });
-        console.log("[AdminDashboard] House deleted:", id);
         const getHouses = httpsCallable<void, { houses: House[] }>(functions, 'getHouses');
         const housesResult = await getHouses();
         if (housesResult.data && Array.isArray(housesResult.data.houses)) {
           setHouses(housesResult.data.houses);
         } else {
-          console.error("[AdminDashboard] Invalid houses data after delete:", housesResult.data);
-          setHouses([]);
           setError("Failed to refresh houses after delete.");
         }
       } catch (err: any) {
-        console.error("[AdminDashboard] Error deleting house:", err);
         setError(err.message || 'An error occurred while deleting the house.');
       }
     }
@@ -126,16 +109,20 @@ export default function AdminDashboard() {
   if (error) return <div>Error: {error}</div>;
 
   return (
-    <div>
-      <h1>Admin Dashboard</h1>
-      <button onClick={() => setEditingHouse('new')}>Add New House</button>
-      <ul>
-        {houses && houses.length > 0 ? (
+    <div className={styles.container}>
+      <h1 className={styles.heading}>Admin Dashboard</h1>
+      <button className={styles.buttonAdd} onClick={() => setEditingHouse('new')}>
+        Add New House
+      </button>
+      <ul className={styles.houseList}>
+        {houses.length > 0 ? (
           houses.map(house => (
-            <li key={house.id}>
+            <li key={house.id} className={styles.houseItem}>
               {house.title || 'Untitled House'}
-              <button onClick={() => setEditingHouse(house)}>Edit</button>
-              <button onClick={() => deleteHouse(house.id)}>Delete</button>
+              <span>
+                <button onClick={() => setEditingHouse(house)}>Edit</button>
+                <button onClick={() => deleteHouse(house.id)}>Delete</button>
+              </span>
             </li>
           ))
         ) : (
