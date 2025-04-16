@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { getFirebaseAdminFirestore } from '@/app/lib/firebaseAdmin';
+import { getFirebaseAdminDB } from '@/app/lib/firebaseAdmin';
 import SessionAuthGuard from '@/app/lib/SessionAuthGuard';
 import NavBar from '@/app/lib/NavBar';
 import DetailsContent from '@/app/components/DetailsPageComponents/DetailsContent';
@@ -9,7 +9,7 @@ export const metadata = {
 };
 
 export default async function PropertyPage({ params }) {
-  const adminDb = getFirebaseAdminFirestore();
+  const adminDb = getFirebaseAdminDB();
   if (!adminDb) {
     console.error('Firebase Admin Firestore not initialized');
     throw new Error('Internal server error');
