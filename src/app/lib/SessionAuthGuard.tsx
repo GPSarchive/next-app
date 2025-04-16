@@ -1,52 +1,42 @@
-// SessionAuthGuard.tsx
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import type { ReactNode } from 'react';
 
 interface SessionAuthGuardProps {
   children: ReactNode;
+  houseId: string;
 }
 
-export default async function SessionAuthGuard({ children }: SessionAuthGuardProps) {
-  // Read the session cookie securely from the server-side
+export default async function SessionAuthGuard({ children, houseId }: SessionAuthGuardProps) {
   const sessionCookie = (await cookies()).get('__session')?.value;
 
-  if (!sessionCookie) {
-    console.error('No session cookie, redirecting to login');
-    redirect('/login');
-  }
-
   try {
-    // Verify the session by calling the secure Cloud Function
-    const response = await fetch(
-      `https://us-central1-real-estate-5ca52.cloudfunctions.net/verifySession`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ data: { sessionCookie } }),
-      }
-    );
+    const response = await fetch('/api/check-house-access', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sessionCookie, houseId }),
+    });
 
-    // If fetch fails or returns a non-OK status, redirect to login
     if (!response.ok) {
       console.error('Fetch failed with status:', response.status);
       redirect('/login');
     }
 
-    // Parse the response
     const result = await response.json();
-   
 
-    // Check if the session is authorized (adjust based on your API’s response structure)
-    const  responseData = result.result;
-    if (!responseData || responseData.status !== 'authorized') {
+    if (result.status === 'allowed') {
+      return <>{children}</>;
+    } else if (result.status === 'unauthenticated') {
       redirect('/login');
-    }    
+    } else if (result.status === 'unauthorized') {
+      redirect('/unauthorized');
+    } else if (result.status === 'not_found') {
+      redirect('/404');
+    } else {
+      redirect('/login');
+    }
   } catch (error) {
-    console.error('Error fetching from Cloud Function:', error);
+    console.error('Error fetching from API:', error);
     redirect('/login');
   }
-
-  // If all checks pass, render the child components
-  return <>{children}</>;
 }

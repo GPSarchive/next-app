@@ -1,7 +1,7 @@
-// src/app/houses/[id]/page.js
 import { notFound } from 'next/navigation';
-import NavBar from '@/app/lib/NavBar';
+import { getFirebaseAdminFirestore } from '@/app/lib/firebaseAdmin';
 import SessionAuthGuard from '@/app/lib/SessionAuthGuard';
+import NavBar from '@/app/lib/NavBar';
 import DetailsContent from '@/app/components/DetailsPageComponents/DetailsContent';
 
 export const metadata = {
@@ -9,36 +9,38 @@ export const metadata = {
 };
 
 export default async function PropertyPage({ params }) {
-  const { id } = params;
-  console.log('🔎 Fetching house with ID:', id);
-
-  let property;
-  try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/houses/${id}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      if (response.status === 404) {
-        console.warn('❌ House not found:', id);
-        notFound();
-      }
-      throw new Error(`Failed to fetch house data: ${response.status} ${response.statusText}`);
-    }
-
-    property = await response.json();
-  } catch (err) {
-    console.error('🔥 Error fetching house data:', err);
-    notFound();
+  const adminDb = getFirebaseAdminFirestore();
+  if (!adminDb) {
+    console.error('Firebase Admin Firestore not initialized');
+    throw new Error('Internal server error');
   }
 
-  return (
-    <SessionAuthGuard>
-      <NavBar />
-      <DetailsContent property={property} />
-    </SessionAuthGuard>
-  );
+  try {
+    const houseDoc = await adminDb.collection('houses').doc(params.id).get();
+    if (!houseDoc.exists) {
+      console.warn('House not found:', params.id);
+      notFound();
+    }
+
+    const houseData = houseDoc.data();
+
+    if (houseData.isPublic) {
+      return (
+        <>
+          <NavBar />
+          <DetailsContent property={houseData} />
+        </>
+      );
+    } else {
+      return (
+        <SessionAuthGuard houseId={params.id}>
+          <NavBar />
+          <DetailsContent property={houseData} />
+        </SessionAuthGuard>
+      );
+    }
+  } catch (error) {
+    console.error('Error fetching house data:', error);
+    notFound();
+  }
 }

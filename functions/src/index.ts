@@ -83,7 +83,7 @@ export const verifySession = functions.https.onCall(
     } catch (error) {
       console.error("Error verifying session cookie:", error);
       return {
-        status: "error",
+        status: "error",  
         redirectTo: "/login",
         message: error instanceof Error ? error.message : "Unknown error",
       };
