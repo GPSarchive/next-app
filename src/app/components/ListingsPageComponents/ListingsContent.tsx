@@ -1,3 +1,4 @@
+// src/app/components/ListingsPageComponents/ListingsContent.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -20,33 +21,42 @@ export default function ListingsContent() {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setLoading(true);
       try {
-        // Fetch public houses
-        const publicQuery = query(collection(db, "houses"), where("isPublic", "==", true));
+        // 1. Fetch public houses first
+        const publicQuery = query(
+          collection(db, "houses"),
+          where("isPublic", "==", true)
+        );
         const publicSnapshot = await getDocs(publicQuery);
-        const publicHouses = publicSnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-          location: {
-            ...doc.data().location,
-            longitude: Number(doc.data().location.longitude),
-          },
-        } as House));
+        const publicHouses = publicSnapshot.docs.map(doc => {
+          const data = doc.data() as House;
+          return {
+            ...data,
+            id: doc.id,
+            location: {
+              ...data.location,
+              longitude: Number(data.location.longitude),
+            },
+            isAdditional: false // Mark these as public houses
+          };
+        });
+        
+        // Immediately set the public houses
+        setHouses(publicHouses);
 
-        if (!user) {
-          // Non-authenticated: only public houses
-          setHouses(publicHouses);
-        } else {
-          // Authenticated: fetch additional houses via getHouses
+        // 2. If authenticated, fetch additional houses and append them
+        if (user) {
           const getHousesFunc = httpsCallable(functions, 'getHouses');
           const result = await getHousesFunc();
           const additionalHouses = (result.data as House[]).map(house => ({
             ...house,
+            isAdditional: true, // Mark these for special styling
             location: {
               ...house.location,
               longitude: Number(house.location.longitude),
             },
           }));
-          setHouses([...publicHouses, ...additionalHouses]);
+          // Append additional houses to the already loaded public houses
+          setHouses(prev => [...prev, ...additionalHouses]);
         }
       } catch (err: any) {
         console.error('Error fetching houses:', err);

@@ -43,12 +43,16 @@ export default function HouseForm({ house, users, onSave, onCancel }: HouseFormP
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData((prev: House) => ({ ...prev, [name]: value }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = e.target;
-    setFormData((prev: House) => ({ ...prev, [name]: checked }));
+    setFormData(prev => ({
+      ...prev,
+      [name]: checked,
+      allowedUsers: name === 'isPublic' && checked ? [] : prev.allowedUsers,
+    }));
   };
 
   const handleMultiSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -59,11 +63,11 @@ export default function HouseForm({ house, users, onSave, onCancel }: HouseFormP
         selected.push(options[i].value);
       }
     }
-    setFormData((prev: House) => ({ ...prev, allowedUsers: selected }));
+    setFormData(prev => ({ ...prev, allowedUsers: selected }));
   };
 
   const handleImageChange = (index: number, field: 'src' | 'alt', value: string) => {
-    setFormData((prev: House) => {
+    setFormData(prev => {
       const newImages = [...prev.images];
       newImages[index] = { ...newImages[index], [field]: value };
       return { ...prev, images: newImages };
@@ -71,22 +75,27 @@ export default function HouseForm({ house, users, onSave, onCancel }: HouseFormP
   };
 
   const addImage = () => {
-    setFormData((prev: House) => ({
+    setFormData(prev => ({
       ...prev,
       images: [...prev.images, { src: '', alt: '' }],
     }));
   };
 
   const removeImage = (index: number) => {
-    setFormData((prev: House) => ({
+    setFormData(prev => ({
       ...prev,
-      images: prev.images.filter((image: { src: string; alt: string }, i: number) => i !== index),
+      images: prev.images.filter((_, i) => i !== index),
     }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSave({ ...formData, location: { latitude: formData.latitude, longitude: formData.longitude } });
+    const dataToSave = {
+      ...formData,
+      location: { latitude: formData.latitude, longitude: formData.longitude },
+      allowedUsers: formData.isPublic ? [] : formData.allowedUsers,
+    };
+    onSave(dataToSave);
   };
 
   return (
@@ -95,7 +104,74 @@ export default function HouseForm({ house, users, onSave, onCancel }: HouseFormP
         Title:
         <input type="text" name="title" value={formData.title} onChange={handleChange} />
       </label>
-      {/* Add similar inputs for all fields: bedrooms, category, description, etc. */}
+      <label>
+        Description:
+        <textarea name="description" value={formData.description} onChange={handleChange} />
+      </label>
+      <label>
+        Price:
+        <input type="text" name="price" value={formData.price} onChange={handleChange} />
+      </label>
+      <label>
+        Bedrooms:
+        <input type="number" name="bedrooms" value={formData.bedrooms} onChange={handleChange} />
+      </label>
+      <label>
+        Category:
+        <input type="text" name="category" value={formData.category} onChange={handleChange} />
+      </label>
+      <label>
+        Energy Class:
+        <input type="text" name="energyClass" value={formData.energyClass} onChange={handleChange} />
+      </label>
+      <label>
+        Floor:
+        <input type="text" name="floor" value={formData.floor} onChange={handleChange} />
+      </label>
+      <label>
+        Has Heating:
+        <input type="checkbox" name="hasHeating" checked={formData.hasHeating === 'Yes'} onChange={e => setFormData(prev => ({ ...prev, hasHeating: e.target.checked ? 'Yes' : 'No' }))} />
+      </label>
+      <label>
+        Heating Type:
+        <input type="text" name="heatingType" value={formData.heatingType} onChange={handleChange} />
+      </label>
+      <label>
+        Kitchens:
+        <input type="text" name="kitchens" value={formData.kitchens} onChange={handleChange} />
+      </label>
+      <label>
+        Latitude:
+        <input type="number" name="latitude" value={formData.latitude} onChange={handleChange} />
+      </label>
+      <label>
+        Longitude:
+        <input type="number" name="longitude" value={formData.longitude} onChange={handleChange} />
+      </label>
+      <label>
+        Parking:
+        <input type="text" name="parking" value={formData.parking} onChange={handleChange} />
+      </label>
+      <label>
+        Size:
+        <input type="text" name="size" value={formData.size} onChange={handleChange} />
+      </label>
+      <label>
+        Special Features:
+        <input type="text" name="specialFeatures" value={formData.specialFeatures} onChange={handleChange} />
+      </label>
+      <label>
+        Suitable For:
+        <input type="text" name="suitableFor" value={formData.suitableFor} onChange={handleChange} />
+      </label>
+      <label>
+        Window Type:
+        <input type="text" name="windowType" value={formData.windowType} onChange={handleChange} />
+      </label>
+      <label>
+        Year Built:
+        <input type="text" name="yearBuilt" value={formData.yearBuilt} onChange={handleChange} />
+      </label>
       <label>
         Is Public:
         <input type="checkbox" name="isPublic" checked={formData.isPublic} onChange={handleCheckboxChange} />
