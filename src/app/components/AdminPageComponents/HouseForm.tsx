@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import { httpsCallable } from 'firebase/functions';
+import { functions } from '@/app/firebase/firebaseConfig';
 import { House } from '@/app/types/house';
 import styles from './HouseForm.module.css';
 
@@ -46,7 +48,9 @@ export default function HouseForm({ house, users, onSave, onCancel }: HouseFormP
     }
   );
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
@@ -64,12 +68,44 @@ export default function HouseForm({ house, users, onSave, onCancel }: HouseFormP
     const options = e.target.options;
     const selected: string[] = [];
     for (let i = 0; i < options.length; i++) {
-      if (options[i].selected) {
-        selected.push(options[i].value);
-      }
+      if (options[i].selected) selected.push(options[i].value);
     }
     setFormData((prev) => ({ ...prev, allowedUsers: selected }));
   };
+
+  // ─── UPDATES START ───
+  // Toggle a single user in allowedUsers
+  const handleToggleUser = async (uid: string) => {
+    // New house: just update local state
+    if (!formData.id) {
+      setFormData((prev) => ({
+        ...prev,
+        allowedUsers: prev.allowedUsers.includes(uid)
+          ? prev.allowedUsers.filter((u) => u !== uid)
+          : [...prev.allowedUsers, uid],
+      }));
+      return;
+    }
+
+    // Existing house: call Cloud Function
+    const fnName = formData.allowedUsers.includes(uid)
+      ? 'removeAllowedUser'
+      : 'addAllowedUser';
+    const callable = httpsCallable<{ houseId: string; uid: string }, { success: boolean }>(
+      functions,
+      fnName
+    );
+    await callable({ houseId: formData.id, uid });
+
+    // Update local state
+    setFormData((prev) => ({
+      ...prev,
+      allowedUsers: prev.allowedUsers.includes(uid)
+        ? prev.allowedUsers.filter((u) => u !== uid)
+        : [...prev.allowedUsers, uid],
+    }));
+  };
+  // ─── UPDATES END ───
 
   const handleImageChange = (index: number, field: 'src' | 'alt', value: string) => {
     setFormData((prev) => {
@@ -102,6 +138,9 @@ export default function HouseForm({ house, users, onSave, onCancel }: HouseFormP
     };
     onSave(dataToSave);
   };
+
+  
+  
 
   return (
     <form onSubmit={handleSubmit} className={styles.form}>
@@ -201,18 +240,20 @@ export default function HouseForm({ house, users, onSave, onCancel }: HouseFormP
       </label>
 
       {!formData.isPublic && (
-        <label className={styles.label}>
-          Allowed Users:
-          <select multiple name="allowedUsers" value={formData.allowedUsers} onChange={handleMultiSelectChange} className={styles.select}>
-            {users.map((user) => (
-              <option key={user.uid} value={user.uid}>
-                {user.displayName || user.email}
-              </option>
-            ))}
-          </select>
-        </label>
-      )}
-
+        <fieldset className={styles.allowedUsers}>
+          <legend>Allowed Users</legend>
+          {users.map((u) => (
+            <label key={u.uid} className={styles.userRow}>
+              <input
+                type="checkbox"
+                checked={formData.allowedUsers.includes(u.uid)}
+                onChange={() => handleToggleUser(u.uid)}
+              />
+              {u.displayName || u.email}
+            </label>
+          ))}
+        </fieldset>
+        )}
       <h3>Images</h3>
       {formData.images.map((image, index) => (
         <div key={index} className={styles.imageRow}>

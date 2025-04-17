@@ -2,7 +2,7 @@ import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 
 admin.initializeApp();
-
+const FieldValue = admin.firestore.FieldValue;
 interface VerifySessionResponse {
   status: string;
   role?: string;
@@ -210,6 +210,53 @@ export const getUsers = functions.https.onCall(
       }
       throw new functions.https.HttpsError("internal",
         "Failed to fetch users.");
+    }
+  }
+);
+
+export const addAllowedUser = functions.https.onCall(
+  async (request: functions.https.CallableRequest) => {
+    if (!request.app) {
+      throw new functions.https.HttpsError("failed-precondition", "Missing App Check token.");
+    }
+    if (!request.auth || request.auth.token.role !== "admin") {
+      throw new functions.https.HttpsError("permission-denied", "Only admins can modify allowed users.");
+    }
+    const { houseId, uid } = request.data as { houseId: string; uid: string };
+    try {
+      await admin
+        .firestore()
+        .collection("houses")
+        .doc(houseId)
+        .update({ allowedUsers: FieldValue.arrayUnion(uid) });
+      return { success: true };
+    } catch (err) {
+      console.error("addAllowedUser error:", err);
+      throw new functions.https.HttpsError("internal", "Failed to add allowed user.");
+    }
+  }
+);
+
+// Remove a UID from allowedUsers
+export const removeAllowedUser = functions.https.onCall(
+  async (request: functions.https.CallableRequest) => {
+    if (!request.app) {
+      throw new functions.https.HttpsError("failed-precondition", "Missing App Check token.");
+    }
+    if (!request.auth || request.auth.token.role !== "admin") {
+      throw new functions.https.HttpsError("permission-denied", "Only admins can modify allowed users.");
+    }
+    const { houseId, uid } = request.data as { houseId: string; uid: string };
+    try {
+      await admin
+        .firestore()
+        .collection("houses")
+        .doc(houseId)
+        .update({ allowedUsers: FieldValue.arrayRemove(uid) });
+      return { success: true };
+    } catch (err) {
+      console.error("removeAllowedUser error:", err);
+      throw new functions.https.HttpsError("internal", "Failed to remove allowed user.");
     }
   }
 );
