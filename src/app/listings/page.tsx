@@ -3,19 +3,24 @@
 import NavBar from '@/app/lib/NavBar';
 import ListingsClientWrapper from '@/app/components/ListingsPageComponents/ListingsClientWrapper';
 import styles from '@/app/components/ListingsPageComponents/HousesMapPage.module.css';
-import { db } from '@/app/firebase/firebaseServer'; // 🔥 server-side firestore
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import { getFirebaseAdminDB } from '@/app/lib/firebaseAdmin';
 import { House } from '@/app/types/house';
 
 export const runtime = 'nodejs';
 
 export default async function SecureListingsPage() {
-  const publicQuery = query(
-    collection(db, 'houses'),
-    where('isPublic', '==', true)
-  );
-  const publicSnapshot = await getDocs(publicQuery);
-  const publicHouses: House[] = publicSnapshot.docs.map(doc => {
+  const db = getFirebaseAdminDB();
+
+  if (!db) {
+    throw new Error('❌ Firebase Admin DB not initialized.');
+  }
+
+  const snapshot = await db
+    .collection('houses')
+    .where('isPublic', '==', true)
+    .get();
+
+  const publicHouses: House[] = snapshot.docs.map((doc) => {
     const data = doc.data() as House;
     return {
       ...data,
@@ -35,3 +40,4 @@ export default async function SecureListingsPage() {
     </div>
   );
 }
+
