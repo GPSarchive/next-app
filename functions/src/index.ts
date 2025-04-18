@@ -132,25 +132,40 @@ export const addHouse = functions.https.onCall(
 export const updateHouse = functions.https.onCall(
   async (request: functions.https.CallableRequest) => {
     if (!request.app) {
-      throw new functions
-        .https.HttpsError("failed-precondition", "Missing App Check token.");
+      throw new functions.https.HttpsError(
+        "failed-precondition",
+        "Missing App Check token."
+      );
     }
     if (!request.auth || request.auth.token.role !== "admin") {
-      throw new functions
-        .https
-        .HttpsError("permission-denied", "Only admins can update houses.");
+      throw new functions.https.HttpsError(
+        "permission-denied",
+        "Only admins can update houses."
+      );
     }
+
     try {
-      const {id, ...houseData} = request.data;
-      await admin.firestore().collection("houses").doc(id).update(houseData);
-      return {success: true};
+      // Extract id and the rest of the house data
+      const { id, ...houseData } = request.data as Record<string, any>;
+
+      // Overwrite entire document—no merge
+      await admin
+        .firestore()
+        .collection("houses")
+        .doc(id)
+        .set(houseData, { merge: false });
+
+      return { success: true };
     } catch (error) {
-      console.error("Error updating house:", error);
-      throw new functions
-        .https.HttpsError("internal", "Failed to update house.");
+      console.error("Error overwriting house:", error);
+      throw new functions.https.HttpsError(
+        "internal",
+        "Failed to overwrite house."
+      );
     }
   }
 );
+
 
 // deleteHouse function
 export const deleteHouse = functions.https.onCall(
@@ -214,59 +229,3 @@ export const getUsers = functions.https.onCall(
   }
 );
 
-export const addAllowedUser = functions.https.onCall(
-  async (request: functions.https.CallableRequest) => {
-    if (!request.app) {
-      throw new functions.https
-        .HttpsError("failed-precondition", "Missing App Check token.");
-    }
-    if (!request.auth || request.auth.token.role !== "admin") {
-      throw new functions.https
-        .HttpsError("permission-denied", "Onlyadminscanmodify allowed users.");
-    }
-    const {houseId, uid} = request.data as { houseId: string; uid: string };
-    try {
-      await admin
-        .firestore()
-        .collection("houses")
-        .doc(houseId)
-        .update({allowedUsers: FieldValue.arrayUnion(uid)});
-      return {success: true};
-    } catch (err) {
-      console.error("addAllowedUser error:", err);
-      throw new functions.https.HttpsError("internal",
-        "Failed to add allowed user.");
-    }
-  }
-);
-
-// Remove a UID from allowedUsers
-export const removeAllowedUser = functions.https.onCall(
-  async (request: functions
-    .https.CallableRequest) => {
-    if (!request.app) {
-      throw new functions
-        .https.HttpsError("failed-precondition",
-          "Missing App Check token.");
-    }
-    if (!request.auth || request.auth.token.role !== "admin") {
-      throw new functions
-        .https.HttpsError("permission-denied",
-          "Only admins can modify allowed users.");
-    }
-    const {houseId, uid} = request
-      .data as { houseId: string; uid: string };
-    try {
-      await admin
-        .firestore()
-        .collection("houses")
-        .doc(houseId)
-        .update({allowedUsers: FieldValue.arrayRemove(uid)});
-      return {success: true};
-    } catch (err) {
-      console.error("removeAllowedUser error:", err);
-      throw new functions
-        .https.HttpsError("internal", "Failed to remove allowed user.");
-    }
-  }
-);
