@@ -2,14 +2,38 @@ import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 
 admin.initializeApp();
-const FieldValue = admin.firestore.FieldValue;
+
 interface VerifySessionResponse {
   status: string;
   role?: string;
   redirectTo?: string;
   message?: string;
 }
-
+interface HouseRecord {
+  id: string;
+  title: string;
+  description: string;
+  price: string;
+  bedrooms: number;
+  category: string;
+  energyClass: string;
+  floor: string;
+  hasHeating: "Yes" | "No";
+  heatingType: string;
+  kitchens: string;
+  latitude: number;
+  longitude: number;
+  location: { latitude: number; longitude: number };
+  parking: string;
+  size: string;
+  specialFeatures: string;
+  suitableFor: string;
+  windowType: string;
+  yearBuilt: string;
+  images: { src: string; alt: string }[];
+  isPublic: boolean;
+  allowedUsers: string[];
+}
 
 export const getHouses = functions.https.onCall(
   async (request: functions.https.CallableRequest) => {
@@ -145,17 +169,18 @@ export const updateHouse = functions.https.onCall(
     }
 
     try {
-      // Extract id and the rest of the house data
-      const { id, ...houseData } = request.data as Record<string, any>;
+      // cast to our concrete type instead of `any`
+      const house = request.data as HouseRecord;
+      const {id, ...houseData} = house;
 
-      // Overwrite entire document—no merge
+      // full overwrite:
       await admin
         .firestore()
         .collection("houses")
         .doc(id)
-        .set(houseData, { merge: false });
+        .set(houseData, {merge: false});
 
-      return { success: true };
+      return {success: true};
     } catch (error) {
       console.error("Error overwriting house:", error);
       throw new functions.https.HttpsError(
