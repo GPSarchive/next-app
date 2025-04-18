@@ -2,38 +2,14 @@ import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 
 admin.initializeApp();
-
+const FieldValue = admin.firestore.FieldValue;
 interface VerifySessionResponse {
   status: string;
   role?: string;
   redirectTo?: string;
   message?: string;
 }
-interface HouseRecord {
-  id: string;
-  title: string;
-  description: string;
-  price: string;
-  bedrooms: number;
-  category: string;
-  energyClass: string;
-  floor: string;
-  hasHeating: "Yes" | "No";
-  heatingType: string;
-  kitchens: string;
-  latitude: number;
-  longitude: number;
-  location: { latitude: number; longitude: number };
-  parking: string;
-  size: string;
-  specialFeatures: string;
-  suitableFor: string;
-  windowType: string;
-  yearBuilt: string;
-  images: { src: string; alt: string }[];
-  isPublic: boolean;
-  allowedUsers: string[];
-}
+
 
 export const getHouses = functions.https.onCall(
   async (request: functions.https.CallableRequest) => {
@@ -156,37 +132,22 @@ export const addHouse = functions.https.onCall(
 export const updateHouse = functions.https.onCall(
   async (request: functions.https.CallableRequest) => {
     if (!request.app) {
-      throw new functions.https.HttpsError(
-        "failed-precondition",
-        "Missing App Check token."
-      );
+      throw new functions
+        .https.HttpsError("failed-precondition", "Missing App Check token.");
     }
     if (!request.auth || request.auth.token.role !== "admin") {
-      throw new functions.https.HttpsError(
-        "permission-denied",
-        "Only admins can update houses."
-      );
+      throw new functions
+        .https
+        .HttpsError("permission-denied", "Only admins can update houses.");
     }
-
     try {
-      // cast to our concrete type instead of `any`
-      const house = request.data as HouseRecord;
-      const {id, ...houseData} = house;
-
-      // full overwrite:
-      await admin
-        .firestore()
-        .collection("houses")
-        .doc(id)
-        .set(houseData, {merge: false});
-
+      const {id, ...houseData} = request.data;
+      await admin.firestore().collection("houses").doc(id).update(houseData);
       return {success: true};
     } catch (error) {
-      console.error("Error overwriting house:", error);
-      throw new functions.https.HttpsError(
-        "internal",
-        "Failed to overwrite house."
-      );
+      console.error("Error updating house:", error);
+      throw new functions
+        .https.HttpsError("internal", "Failed to update house.");
     }
   }
 );
@@ -254,3 +215,51 @@ export const getUsers = functions.https.onCall(
   }
 );
 
+export const addAllowedUser = functions.https.onCall(
+  async (request: functions.https.CallableRequest) => {
+    if (!request.app) {
+      throw new functions.https.HttpsError(
+        "failed-precondition",
+        "Missing App Check token."
+      );
+    }
+    if (!request.auth || request.auth.token.role !== "admin") {
+      throw new functions.https.HttpsError(
+        "permission-denied",
+        "Only admins can modify allowed users."
+      );
+    }
+    const {houseId, uid} = request.data as { houseId: string; uid: string };
+    await admin
+      .firestore()
+      .collection("houses")
+      .doc(houseId)
+      .update({allowedUsers: admin.firestore.FieldValue.arrayUnion(uid)});
+    return {success: true};
+  }
+);
+
+// Remove a single UID from a house’s allowedUsers
+export const removeAllowedUser = functions.https.onCall(
+  async (request: functions.https.CallableRequest) => {
+    if (!request.app) {
+      throw new functions.https.HttpsError(
+        "failed-precondition",
+        "Missing App Check token."
+      );
+    }
+    if (!request.auth || request.auth.token.role !== "admin") {
+      throw new functions.https.HttpsError(
+        "permission-denied",
+        "Only admins can modify allowed users."
+      );
+    }
+    const {houseId, uid} = request.data as { houseId: string; uid: string };
+    await admin
+      .firestore()
+      .collection("houses")
+      .doc(houseId)
+      .update({allowedUsers: admin.firestore.FieldValue.arrayRemove(uid)});
+    return {success: true};
+  }
+);

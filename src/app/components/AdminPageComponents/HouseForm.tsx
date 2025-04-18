@@ -1,7 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import { httpsCallable } from 'firebase/functions';
+import { functions } from '@/app/firebase/firebaseConfig';
 import { House } from '@/app/types/house';
+import styles from './HouseForm.module.css';
 
 interface User {
   uid: string;
@@ -49,29 +52,63 @@ export default function HouseForm({ house, users, onSave, onCancel }: HouseFormP
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: checked,
       allowedUsers: name === 'isPublic' && checked ? [] : prev.allowedUsers,
     }));
   };
 
-  const handleToggleUser = (uid: string) => {
-    setFormData(prev => ({
+  const handleMultiSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const options = e.target.options;
+    const selected: string[] = [];
+    for (let i = 0; i < options.length; i++) {
+      if (options[i].selected) selected.push(options[i].value);
+    }
+    setFormData((prev) => ({ ...prev, allowedUsers: selected }));
+  };
+
+  // ─── UPDATES START ───
+  // Toggle a single user in allowedUsers
+  const handleToggleUser = async (uid: string) => {
+    // New house: just update local state
+    if (!formData.id) {
+      setFormData((prev) => ({
+        ...prev,
+        allowedUsers: prev.allowedUsers.includes(uid)
+          ? prev.allowedUsers.filter((u) => u !== uid)
+          : [...prev.allowedUsers, uid],
+      }));
+      return;
+    }
+
+    // Existing house: call Cloud Function
+    const fnName = formData.allowedUsers.includes(uid)
+      ? 'removeAllowedUser'
+      : 'addAllowedUser';
+    const callable = httpsCallable<{ houseId: string; uid: string }, { success: boolean }>(
+      functions,
+      fnName
+    );
+    await callable({ houseId: formData.id, uid });
+
+    // Update local state
+    setFormData((prev) => ({
       ...prev,
       allowedUsers: prev.allowedUsers.includes(uid)
-        ? prev.allowedUsers.filter(u => u !== uid)
+        ? prev.allowedUsers.filter((u) => u !== uid)
         : [...prev.allowedUsers, uid],
     }));
   };
+  // ─── UPDATES END ───
 
   const handleImageChange = (index: number, field: 'src' | 'alt', value: string) => {
-    setFormData(prev => {
+    setFormData((prev) => {
       const newImages = [...prev.images];
       newImages[index] = { ...newImages[index], [field]: value };
       return { ...prev, images: newImages };
@@ -79,14 +116,14 @@ export default function HouseForm({ house, users, onSave, onCancel }: HouseFormP
   };
 
   const addImage = () => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       images: [...prev.images, { src: '', alt: '' }],
     }));
   };
 
   const removeImage = (index: number) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       images: prev.images.filter((_, i) => i !== index),
     }));
@@ -299,17 +336,19 @@ export default function HouseForm({ house, users, onSave, onCancel }: HouseFormP
       </label>
 
       {!formData.isPublic && (
-        <fieldset>
+        <fieldset className={styles.allowedUsers}>
           <legend>Allowed Users</legend>
-          {users.map(user => (
-            <label key={user.uid}>
-              <input
-                type="checkbox"
-                checked={formData.allowedUsers.includes(user.uid)}
-                onChange={() => handleToggleUser(user.uid)}
-              />
-              {user.displayName || user.email}
-            </label>
+          {users.map((u) => (
+            <div key={u.uid} className={styles.userRow}>
+              <label>
+                <input
+                  type="checkbox"
+                  checked={formData.allowedUsers.includes(u.uid)}
+                  onChange={() => handleToggleUser(u.uid)}
+                />
+                {u.displayName || u.email}
+              </label>
+            </div>
           ))}
         </fieldset>
       )}

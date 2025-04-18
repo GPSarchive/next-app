@@ -1,10 +1,10 @@
 'use client';
-
 import { useState, useEffect } from 'react';
 import { httpsCallable } from 'firebase/functions';
 import { functions } from '@/app/firebase/firebaseConfig';
 import { House } from '@/app/types/house';
 import HouseForm from '@/app/components/AdminPageComponents/HouseForm';
+import styles from './AdminDashboard.module.css';
 
 interface User {
   uid: string;
@@ -110,26 +110,28 @@ export default function AdminDashboard() {
   if (error) return <div>Error: {error}</div>;
 
   return (
-    <div>
-      <h1>Admin Dashboard</h1>
-      <button onClick={() => setEditingHouse('new')}>Add New House</button>
-      <ul>
+    <div className={styles.container}>
+      <h1 className={styles.heading}>Admin Dashboard</h1>
+      <button className={styles.buttonAdd} onClick={() => setEditingHouse('new')}>
+        Add New House
+      </button>
+      <ul className={styles.houseList}>
         {houses.length > 0 ? (
           houses.map(house => (
-            <li key={house.id}>
+            <li key={house.id} className={styles.houseItem}>
               {house.title || 'Untitled House'}
-              <button onClick={() => setEditingHouse(house)}>Edit</button>
-              <button onClick={() => deleteHouse(house.id)}>Delete</button>
+              <span>
+                <button onClick={() => setEditingHouse(house)}>Edit</button>
+                <button onClick={() => deleteHouse(house.id)}>Delete</button>
+              </span>
             </li>
           ))
         ) : (
           <li>No houses available.</li>
         )}
       </ul>
-
       {editingHouse && (
         <HouseForm
-          key={editingHouse === 'new' ? 'new' : editingHouse.id}
           house={editingHouse === 'new' ? null : editingHouse}
           users={users}
           onSave={saveHouse}
