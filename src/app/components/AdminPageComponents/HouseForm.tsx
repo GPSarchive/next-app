@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { httpsCallable } from 'firebase/functions';
 import { functions } from '@/app/firebase/firebaseConfig';
 import { House } from '@/app/types/house';
-import styles from './HouseForm.module.css';
+import styles from '@/app/components/AdminPageComponents/adminHouseForm.module.css';
 
 interface User {
   uid: string;
