@@ -87,27 +87,30 @@ const HouseCarousel = ({ house, onHover }: HouseCarouselProps) => {
     autoplaySpeed: 3000,
     prevArrow: <CustomPrevArrow />,
     nextArrow: <CustomNextArrow />,
-    beforeChange: (_, next) => setCurrentIndex(next),
+    beforeChange: (_: number, next: number) => setCurrentIndex(next),
   };
 
   return (
-    <Link href={`/houses/${house.id}`} passHref>
-      <div className={styles.carousel} onMouseEnter={() => onHover(house)}>
+    <Link href={`/houses/${house.id}`}>
+      <a
+        className={styles.carousel}
+        onMouseEnter={() => onHover(house)}
+      >
         <Slider {...settings}>
           {house.images.map((img, index) => (
             <figure key={index} className={styles.carouselSlide}>
               <Image
                 src={img.src}
-                alt={img.alt || `${house.title} - Image ${index + 1}`}
+                alt={img.alt ?? `${house.title} — image ${index + 1}`}
                 width={1200}
                 height={800}
                 className={styles.carouselImage}
                 priority={index === 0}
               />
               <figcaption className="sr-only">
-                {house.title} - {house.price}
+                {house.title} — {house.price}
               </figcaption>
-              <div className={styles.gradientOverlay}></div>
+              <div className={styles.gradientOverlay} />
             </figure>
           ))}
         </Slider>
@@ -115,7 +118,7 @@ const HouseCarousel = ({ house, onHover }: HouseCarouselProps) => {
           <h3>{house.title}</h3>
           <p>{house.price}</p>
         </div>
-      </div>
+      </a>
     </Link>
   );
 };

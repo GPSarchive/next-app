@@ -1,3 +1,4 @@
+// app/houses/[id]/page.js
 import { notFound } from 'next/navigation';
 import { getFirebaseAdminDB } from '@/app/lib/firebaseAdmin';
 import SessionAuthGuard from '@/app/lib/SessionAuthGuard';

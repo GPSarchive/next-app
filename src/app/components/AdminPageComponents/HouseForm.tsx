@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { httpsCallable } from 'firebase/functions';
 import { functions } from '@/app/firebase/firebaseConfig';
 import { House } from '@/app/types/house';
@@ -48,6 +48,37 @@ export default function HouseForm({ house, users, onSave, onCancel }: HouseFormP
     }
   );
 
+  // Update formData when house prop changes
+  useEffect(() => {
+    setFormData(
+      house || {
+        id: '',
+        title: '',
+        description: '',
+        price: '',
+        bedrooms: 0,
+        category: '',
+        energyClass: '',
+        floor: '',
+        hasHeating: 'Yes',
+        heatingType: '',
+        kitchens: '1',
+        latitude: 0,
+        longitude: 0,
+        location: { latitude: 0, longitude: 0 },
+        parking: '',
+        size: '',
+        specialFeatures: '',
+        suitableFor: '',
+        windowType: '',
+        yearBuilt: '',
+        images: [],
+        isPublic: true,
+        allowedUsers: [],
+      }
+    );
+  }, [house]);
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
@@ -73,7 +104,6 @@ export default function HouseForm({ house, users, onSave, onCancel }: HouseFormP
     setFormData((prev) => ({ ...prev, allowedUsers: selected }));
   };
 
-  // ─── UPDATES START ───
   // Toggle a single user in allowedUsers
   const handleToggleUser = async (uid: string) => {
     // New house: just update local state
@@ -105,7 +135,6 @@ export default function HouseForm({ house, users, onSave, onCancel }: HouseFormP
         : [...prev.allowedUsers, uid],
     }));
   };
-  // ─── UPDATES END ───
 
   const handleImageChange = (index: number, field: 'src' | 'alt', value: string) => {
     setFormData((prev) => {
