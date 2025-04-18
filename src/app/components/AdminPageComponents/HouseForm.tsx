@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { House } from '@/app/types/house';
 
 interface User {
@@ -17,39 +17,33 @@ interface HouseFormProps {
 }
 
 export default function HouseForm({ house, users, onSave, onCancel }: HouseFormProps) {
-  // blank template for a new house
-  const blankHouse: House = {
-    id: '',
-    title: '',
-    description: '',
-    price: '',
-    bedrooms: 0,
-    category: '',
-    energyClass: '',
-    floor: '',
-    hasHeating: 'Yes',
-    heatingType: '',
-    kitchens: '1',
-    latitude: 0,
-    longitude: 0,
-    location: { latitude: 0, longitude: 0 },
-    parking: '',
-    size: '',
-    specialFeatures: '',
-    suitableFor: '',
-    windowType: '',
-    yearBuilt: '',
-    images: [],
-    isPublic: true,
-    allowedUsers: [],
-  };
-
-  const [formData, setFormData] = useState<House>(house ?? blankHouse);
-
-  // reset whenever `house` prop changes
-  useEffect(() => {
-    setFormData(house ?? blankHouse);
-  }, [house]);
+  const [formData, setFormData] = useState<House>(
+    house || {
+      id: '',
+      title: '',
+      description: '',
+      price: '',
+      bedrooms: 0,
+      category: '',
+      energyClass: '',
+      floor: '',
+      hasHeating: 'Yes',
+      heatingType: '',
+      kitchens: '1',
+      latitude: 0,
+      longitude: 0,
+      location: { latitude: 0, longitude: 0 },
+      parking: '',
+      size: '',
+      specialFeatures: '',
+      suitableFor: '',
+      windowType: '',
+      yearBuilt: '',
+      images: [],
+      isPublic: true,
+      allowedUsers: [],
+    }
+  );
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -78,32 +72,34 @@ export default function HouseForm({ house, users, onSave, onCancel }: HouseFormP
 
   const handleImageChange = (index: number, field: 'src' | 'alt', value: string) => {
     setFormData(prev => {
-      const imgs = [...prev.images];
-      imgs[index] = { ...imgs[index], [field]: value };
-      return { ...prev, images: imgs };
+      const newImages = [...prev.images];
+      newImages[index] = { ...newImages[index], [field]: value };
+      return { ...prev, images: newImages };
     });
   };
 
-  const addImage = () => setFormData(prev => ({
-    ...prev,
-    images: [...prev.images, { src: '', alt: '' }]
-  }));
+  const addImage = () => {
+    setFormData(prev => ({
+      ...prev,
+      images: [...prev.images, { src: '', alt: '' }],
+    }));
+  };
 
-  const removeImage = (i: number) => setFormData(prev => ({
-    ...prev,
-    images: prev.images.filter((_, idx) => idx !== i)
-  }));
+  const removeImage = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index),
+    }));
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSave({
+    const dataToSave = {
       ...formData,
-      location: {
-        latitude: formData.latitude,
-        longitude: formData.longitude
-      },
-      allowedUsers: formData.isPublic ? [] : formData.allowedUsers
-    });
+      location: { latitude: formData.latitude, longitude: formData.longitude },
+      allowedUsers: formData.isPublic ? [] : formData.allowedUsers,
+    };
+    onSave(dataToSave);
   };
 
   return (
