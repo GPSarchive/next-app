@@ -1,14 +1,7 @@
 /* adminHouseForm.module.css */
 
 /* 1) Declare your CSS variables globally: */
-:global(:root) {
-  --font-sans: 'Inter', sans-serif;
-  --color-text: #333;
-  --color-border: #e2e2e2;
-  --color-primary: #0070f3;
-  --color-error: #e00;
-  --spacing: 1rem;
-}
+
 
 /* 2) Everything below is module‑scoped: */
 .form {
