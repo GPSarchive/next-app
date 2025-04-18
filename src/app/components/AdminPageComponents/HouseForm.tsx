@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { House } from '@/app/types/house';
+import styles from './HouseForm.module.css';
 
 interface User {
   uid: string;
@@ -16,12 +17,7 @@ interface HouseFormProps {
   onCancel: () => void;
 }
 
-export default function HouseForm({
-  house,
-  users,
-  onSave,
-  onCancel,
-}: HouseFormProps) {
+export default function HouseForm({ house, users, onSave, onCancel }: HouseFormProps) {
   const [formData, setFormData] = useState<House>(
     house || {
       id: '',
@@ -51,40 +47,34 @@ export default function HouseForm({
   );
 
   const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = e.target;
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
       [name]: checked,
       allowedUsers: name === 'isPublic' && checked ? [] : prev.allowedUsers,
     }));
   };
 
-  const handleMultiSelectChange = (
-    e: React.ChangeEvent<HTMLSelectElement>
-  ) => {
-    const options = e.target.options;
-    const selected: string[] = [];
-    for (let i = 0; i < options.length; i++) {
-      if (options[i].selected) selected.push(options[i].value);
-    }
-    setFormData((prev) => ({ ...prev, allowedUsers: selected }));
+  // ─── UPDATE: purely local toggle ───
+  const handleToggleUser = (uid: string) => {
+    setFormData(prev => ({
+      ...prev,
+      allowedUsers: prev.allowedUsers.includes(uid)
+        ? prev.allowedUsers.filter(u => u !== uid)
+        : [...prev.allowedUsers, uid],
+    }));
   };
+  // ──────────────────────────────────
 
-  const handleImageChange = (
-    index: number,
-    field: 'src' | 'alt',
-    value: string
-  ) => {
-    setFormData((prev) => {
+  const handleImageChange = (index: number, field: 'src' | 'alt', value: string) => {
+    setFormData(prev => {
       const newImages = [...prev.images];
       newImages[index] = { ...newImages[index], [field]: value };
       return { ...prev, images: newImages };
@@ -92,14 +82,14 @@ export default function HouseForm({
   };
 
   const addImage = () => {
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
       images: [...prev.images, { src: '', alt: '' }],
     }));
   };
 
   const removeImage = (index: number) => {
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
       images: prev.images.filter((_, i) => i !== index),
     }));
@@ -109,14 +99,12 @@ export default function HouseForm({
     e.preventDefault();
     const dataToSave = {
       ...formData,
-      location: {
-        latitude: formData.latitude,
-        longitude: formData.longitude,
-      },
+      location: { latitude: formData.latitude, longitude: formData.longitude },
       allowedUsers: formData.isPublic ? [] : formData.allowedUsers,
     };
     onSave(dataToSave);
   };
+
 
   return (
     <form
@@ -360,19 +348,19 @@ export default function HouseForm({
           <span className="text-sm font-medium text-gray-700 mb-1">
             Allowed Users
           </span>
-          <select
-            multiple
-            name="allowedUsers"
-            value={formData.allowedUsers}
-            onChange={handleMultiSelectChange}
-            className="mt-1 p-2 border border-gray-200 rounded-lg focus:ring focus:ring-blue-200 h-32"
-          >
-            {users.map((user) => (
-              <option key={user.uid} value={user.uid}>
+          {users.map((user) => (
+            <label key={user.uid} className="inline-flex items-center mb-1">
+              <input
+                type="checkbox"
+                checked={formData.allowedUsers.includes(user.uid)}
+                onChange={() => handleToggleUser(user.uid)}
+                className="h-4 w-4 rounded border-gray-300 focus:ring focus:ring-blue-200"
+              />
+              <span className="ml-2 text-gray-700">
                 {user.displayName || user.email}
-              </option>
-            ))}
-          </select>
+              </span>
+            </label>
+          ))}
         </div>
       )}
 
