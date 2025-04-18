@@ -1,13 +1,3 @@
-/* HouseForm.module.css */
-
-:root {
-    --font-sans: 'Inter', sans-serif;
-    --color-text: #333;
-    --color-border: #e2e2e2;
-    --color-primary: #0070f3;
-    --color-error: #e00;
-    --spacing: 1rem;
-  }
   
   .form {
     display: grid;
