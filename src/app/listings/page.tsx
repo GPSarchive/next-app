@@ -5,6 +5,7 @@ import ListingsClientWrapper from '@/app/components/ListingsPageComponents/Listi
 import styles from '@/app/components/ListingsPageComponents/HousesMapPage.module.css';
 import { getFirebaseAdminDB } from '@/app/lib/firebaseAdmin';
 import { House } from '@/app/types/house';
+export const dynamic = 'force-dynamic';
 
 export const runtime = 'nodejs';
 
