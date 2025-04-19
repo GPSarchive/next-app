@@ -19,7 +19,7 @@ export default async function SecureListingsPage() {
     .collection('houses')
     .where('isPublic', '==', true)
     .get();
-
+  console.log('Fetched public houses:', snapshot.docs.length);
   const publicHouses: House[] = snapshot.docs.map((doc) => {
     const data = doc.data() as House;
     return {

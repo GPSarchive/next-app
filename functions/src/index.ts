@@ -74,7 +74,6 @@ export const getHouses = functions.https.onCall(
       const houses = snapshot.docs.map((doc) => {
         // remove any stray `id` field in the stored data
         const data = {...(doc.data() as Record<string, any>)};
-        delete data.id;
         // spread the rest, then attach the real doc.id
         return {...data, id: doc.id};
       });
