@@ -1,4 +1,5 @@
 'use client';
+
 import { useState, useEffect } from 'react';
 import { httpsCallable } from 'firebase/functions';
 import { functions } from '@/app/firebase/firebaseConfig';
@@ -9,7 +10,7 @@ import styles from './AdminDashboard.module.css';
 interface User {
   uid: string;
   email: string;
-  displayName: string;
+  displayName?: string;
 }
 
 export default function AdminDashboard() {
@@ -19,45 +20,40 @@ export default function AdminDashboard() {
   const [error, setError] = useState<string | null>(null);
   const [editingHouse, setEditingHouse] = useState<House | 'new' | null>(null);
 
+  // Fetch houses + users on mount
   useEffect(() => {
     async function fetchData() {
       try {
-        const getHouses = httpsCallable<void, { houses: House[] }>(functions, 'getHouses');
-        const housesResult = await getHouses();
-
-        let housesData: House[] = [];
+        // getHouses -> returns House[]
+        const getHousesFn = httpsCallable<void, House[]>(functions, 'getHouses');
+        const housesResult = await getHousesFn();
         if (Array.isArray(housesResult.data)) {
-          housesData = housesResult.data.map(house => ({
-            ...house,
-            location: {
-              ...house.location,
-              longitude: Number(house.location.longitude),
-            },
-          }));
-        } else if (housesResult.data && Array.isArray(housesResult.data.houses)) {
-          housesData = housesResult.data.houses.map(house => ({
-            ...house,
-            location: {
-              ...house.location,
-              longitude: Number(house.location.longitude),
-            },
-          }));
+          setHouses(
+            housesResult.data.map(h => ({
+              ...h,
+              // ensure lat/lng are numbers
+              location: {
+                latitude: Number(h.location.latitude),
+                longitude: Number(h.location.longitude),
+              },
+            }))
+          );
         } else {
-          setError("Failed to load houses: invalid data format.");
+          throw new Error('Unexpected getHouses response');
         }
-        setHouses(housesData);
 
-        const getUsers = httpsCallable<void, { users: User[] }>(functions, 'getUsers');
-        const usersResult = await getUsers();
-        if (usersResult.data && Array.isArray(usersResult.data.users)) {
+        // getUsers -> returns { users: User[] }
+        const getUsersFn = httpsCallable<void, { users: User[] }>(functions, 'getUsers');
+        const usersResult = await getUsersFn();
+        if (Array.isArray(usersResult.data.users)) {
           setUsers(usersResult.data.users);
         } else {
-          setError("Failed to load users: invalid data format.");
+          throw new Error('Unexpected getUsers response');
         }
+
       } catch (err: any) {
-        setError(err.message || 'An error occurred while fetching data.');
-        setHouses([]);
-        setUsers([]);
+        console.error(err);
+        setError(err.message || 'Failed to load data.');
       } finally {
         setLoading(false);
       }
@@ -65,64 +61,93 @@ export default function AdminDashboard() {
     fetchData();
   }, []);
 
+  // Single onSave for both add & update
   const saveHouse = async (house: House) => {
+    setLoading(true);
     try {
       if (house.id) {
-        const updateHouse = httpsCallable<House, { success: boolean }>(functions, 'updateHouse');
-        await updateHouse(house);
+        // update existing
+        const updateHouseFn = httpsCallable<House, { success: boolean }>(functions, 'updateHouse');
+        await updateHouseFn(house);
       } else {
-        const addHouse = httpsCallable<House, { id: string }>(functions, 'addHouse');
-        const result = await addHouse(house);
+        // add new
+        const addHouseFn = httpsCallable<House, { id: string }>(functions, 'addHouse');
+        const result = await addHouseFn(house);
         house.id = result.data.id;
       }
-      const getHouses = httpsCallable<void, { houses: House[] }>(functions, 'getHouses');
-      const housesResult = await getHouses();
-      if (housesResult.data && Array.isArray(housesResult.data.houses)) {
-        setHouses(housesResult.data.houses);
+
+      // refresh list
+      const getHousesFn = httpsCallable<void, House[]>(functions, 'getHouses');
+      const fresh = await getHousesFn();
+      if (Array.isArray(fresh.data)) {
+        setHouses(
+          fresh.data.map(h => ({
+            ...h,
+            location: {
+              latitude: Number(h.location.latitude),
+              longitude: Number(h.location.longitude),
+            },
+          }))
+        );
       } else {
-        setError("Failed to refresh houses after save.");
+        throw new Error('Failed to refresh houses');
       }
       setEditingHouse(null);
     } catch (err: any) {
-      setError(err.message || 'An error occurred while saving the house.');
+      console.error(err);
+      setError(err.message || 'Failed to save house.');
+    } finally {
+      setLoading(false);
     }
   };
 
   const deleteHouse = async (id: string) => {
-    if (confirm('Are you sure you want to delete this house?')) {
-      try {
-        const deleteHouseFunc = httpsCallable<{ id: string }, { success: boolean }>(functions, 'deleteHouse');
-        await deleteHouseFunc({ id });
-        const getHouses = httpsCallable<void, { houses: House[] }>(functions, 'getHouses');
-        const housesResult = await getHouses();
-        if (housesResult.data && Array.isArray(housesResult.data.houses)) {
-          setHouses(housesResult.data.houses);
-        } else {
-          setError("Failed to refresh houses after delete.");
-        }
-      } catch (err: any) {
-        setError(err.message || 'An error occurred while deleting the house.');
+    if (!confirm('Are you sure you want to delete this house?')) return;
+    setLoading(true);
+    try {
+      const deleteHouseFn = httpsCallable<{ id: string }, { success: boolean }>(
+        functions,
+        'deleteHouse'
+      );
+      await deleteHouseFn({ id });
+
+      // refresh list
+      const getHousesFn = httpsCallable<void, House[]>(functions, 'getHouses');
+      const fresh = await getHousesFn();
+      if (Array.isArray(fresh.data)) {
+        setHouses(fresh.data);
+      } else {
+        throw new Error('Failed to refresh houses');
       }
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message || 'Failed to delete house.');
+    } finally {
+      setLoading(false);
     }
   };
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
+  if (loading) return <div className={styles.message}>Loading…</div>;
+  if (error)   return <div className={styles.error}>Error: {error}</div>;
 
   return (
     <div className={styles.container}>
       <h1 className={styles.heading}>Admin Dashboard</h1>
-      <button className={styles.buttonAdd} onClick={() => setEditingHouse('new')}>
+      <button
+        className={styles.buttonAdd}
+        onClick={() => setEditingHouse('new')}
+      >
         Add New House
       </button>
+
       <ul className={styles.houseList}>
         {houses.length > 0 ? (
-          houses.map(house => (
-            <li key={house.id} className={styles.houseItem}>
-              {house.title || 'Untitled House'}
-              <span>
-                <button onClick={() => setEditingHouse(house)}>Edit</button>
-                <button onClick={() => deleteHouse(house.id)}>Delete</button>
+          houses.map(h => (
+            <li key={h.id} className={styles.houseItem}>
+              {h.title || 'Untitled'}
+              <span className={styles.actions}>
+                <button onClick={() => setEditingHouse(h)}>Edit</button>
+                <button onClick={() => deleteHouse(h.id)}>Delete</button>
               </span>
             </li>
           ))
@@ -130,7 +155,8 @@ export default function AdminDashboard() {
           <li>No houses available.</li>
         )}
       </ul>
-      {editingHouse && (
+
+      {editingHouse !== null && (
         <HouseForm
           house={editingHouse === 'new' ? null : editingHouse}
           users={users}
