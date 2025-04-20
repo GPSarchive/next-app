@@ -13,6 +13,7 @@ export default async function SessionAuthGuard({ children, houseId }: SessionAut
   try {
     const response = await fetch('/api/check-house-access', {
       method: 'POST',
+      cache: 'no-store',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ sessionCookie, houseId }),
     });

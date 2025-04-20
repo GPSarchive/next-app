@@ -1,3 +1,5 @@
+//src/app/api/check-house-access/route.tsx
+export const dynamic = 'force-dynamic';
 import { getFirebaseAdminAuth, getFirebaseAdminDB } from '@/app/lib/firebaseAdmin';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -21,7 +23,7 @@ export async function POST(req: NextRequest) {
     const houseDoc = await adminDb.collection('houses').doc(houseId).get();
     if (!houseDoc.exists) {
       return NextResponse.json({ status: 'not_found' });
-    }
+    } 
     const houseData = houseDoc.data();
 
     if (houseData?.isPublic) {
@@ -32,6 +34,8 @@ export async function POST(req: NextRequest) {
     if (!sessionCookie) {
       return NextResponse.json({ status: 'unauthenticated' });
     }
+    console.log('check-house-access', { houseId, sessionCookie });
+    console.log('houseData.allowedUsers:', houseData?.allowedUsers);
 
     // Verify session cookie
     const decodedClaims = await adminAuth.verifySessionCookie(sessionCookie, true);
