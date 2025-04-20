@@ -11,12 +11,32 @@ export const metadata = {
 
 export default async function PropertyPage({ params }) {
   const adminDb = getFirebaseAdminDB()
-  if (!adminDb) throw new Error('Firebase Admin not initialized')
+  if (!adminDb) {
+    console.error('[PropertyPage] Firebase Admin DB not initialized')
+    throw new Error('Internal server error')
+  }
 
   // 1. Fetch the house
-  const houseSnap = await adminDb.collection('houses').doc(params.id).get()
-  if (!houseSnap.exists) notFound()
+  let houseSnap
+  try {
+    houseSnap = await adminDb.collection('houses').doc(params.id).get()
+  } catch (err) {
+    console.error('[PropertyPage] Error fetching document:', err)
+    notFound()
+  }
+
+  if (!houseSnap.exists) {
+    console.warn('[PropertyPage] House not found:', params.id)
+    notFound()
+  }
+
   const houseData = houseSnap.data()
+
+  // Sanity: make sure isPublic is boolean
+  if (typeof houseData.isPublic !== 'boolean') {
+    console.error('[PropertyPage] Invalid isPublic field:', houseData.isPublic)
+    notFound()
+  }
 
   // 2. Public → show
   if (houseData.isPublic) {
@@ -30,20 +50,30 @@ export default async function PropertyPage({ params }) {
 
   // 3. Private → check session cookie
   const sessionCookie = cookies().get('__session')?.value
-  if (!sessionCookie) redirect('/login')
+  if (!sessionCookie) {
+    console.warn('[PropertyPage] No session cookie, redirecting to login')
+    redirect('/login')
+  }
 
   const adminAuth = getFirebaseAdminAuth()
-  if (!adminAuth) throw new Error('Firebase Auth not initialized')
+  if (!adminAuth) {
+    console.error('[PropertyPage] Firebase Admin Auth not initialized')
+    throw new Error('Internal server error')
+  }
 
   let decoded
   try {
     decoded = await adminAuth.verifySessionCookie(sessionCookie, true)
   } catch (err) {
-    console.error('Invalid session cookie:', err)
-    return redirect('/login')
+    console.error('[PropertyPage] Invalid session cookie:', err)
+    redirect('/login')
   }
 
-  const { uid, role } = decoded
+  const { uid, role } = decoded || {}
+  if (!uid) {
+    console.error('[PropertyPage] Missing UID in decoded cookie:', decoded)
+    redirect('/login')
+  }
 
   // 4a. Admins always see it
   if (role === 'admin') {
@@ -55,11 +85,20 @@ export default async function PropertyPage({ params }) {
     )
   }
 
-  // 4b. Otherwise must be in allowedUsers[]
+  // Sanity: ensure allowedUsers is an array of strings
   if (
-    Array.isArray(houseData.allowedUsers) &&
-    houseData.allowedUsers.includes(uid)
+    !Array.isArray(houseData.allowedUsers) ||
+    !houseData.allowedUsers.every((x) => typeof x === 'string')
   ) {
+    console.error(
+      '[PropertyPage] Invalid allowedUsers array:',
+      houseData.allowedUsers
+    )
+    redirect('/unauthorized')
+  }
+
+  // 4b. Otherwise must be in allowedUsers[]
+  if (houseData.allowedUsers.includes(uid)) {
     return (
       <>
         <NavBar />
@@ -69,5 +108,10 @@ export default async function PropertyPage({ params }) {
   }
 
   // 5. No access
-  redirect('/login')
+  console.warn(
+    '[PropertyPage] UID not in allowedUsers, redirecting:',
+    uid,
+    houseData.allowedUsers
+  )
+  redirect('/unauthorized')
 }
