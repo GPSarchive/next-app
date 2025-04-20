@@ -26,8 +26,7 @@ export default function SignUp() {
       if (auth.currentUser) {
         await auth.currentUser.reload();
         if (auth.currentUser.emailVerified) {
-          await auth.signOut(); // end session to avoid stale state
-          router.push("/login?verified=true");
+          router.push("/home");
         }
       }
     }, 3000);
