@@ -76,11 +76,18 @@ export default function Login() {
           <label className="block mb-2 font-medium">Password</label>
           <input
             type="password"
-            className="w-full p-2 border rounded mb-4"
+            className="w-full p-2 border rounded mb-2"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
           />
+
+          {/* Forgot Password Link */}
+          <p className="text-right text-sm mb-4">
+            <a href="/forgot-password" className="text-blue-600 hover:underline">
+              Forgot password?
+            </a>
+          </p>
 
           <button
             type="submit"
@@ -90,14 +97,17 @@ export default function Login() {
           </button>
         </form>
 
-          <button
+        <button
           onClick={handleGoogleLogin}
-          className="w-full bg-white border border-gray-300 text-gray-800 py-2 px-4 rounded flex items-center justify-center gap-2 hover:shadow-md transition">
+          className="w-full bg-white border border-gray-300 text-gray-800 py-2 px-4 rounded flex items-center justify-center gap-2 hover:shadow-md transition mb-4"
+        >
           <img
-          src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
-          alt="Google logo"
-          className="w-5 h-5"/>
-          </button>
+            src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+            alt="Google logo"
+            className="w-5 h-5"
+          />
+          Sign in with Google
+        </button>
 
         <p className="text-center mt-4 text-sm">
           Don&apos;t have an account?{' '}

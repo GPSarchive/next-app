@@ -94,7 +94,7 @@ export default async function PropertyPage({ params }) {
       '[PropertyPage] Invalid allowedUsers array:',
       houseData.allowedUsers
     )
-    redirect('/unauthorized')
+    redirect('/login')
   }
 
   // 4b. Otherwise must be in allowedUsers[]
@@ -113,5 +113,5 @@ export default async function PropertyPage({ params }) {
     uid,
     houseData.allowedUsers
   )
-  redirect('/unauthorized')
+  redirect('/login')
 }
