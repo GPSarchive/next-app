@@ -105,7 +105,7 @@ const HouseCarousel = ({ house, onHover }: HouseCarouselProps) => {
               alt={img.alt ?? `${house.title} — image ${index + 1}`}
               width={1200}
               height={800}
-              className="w-full h-full objec"
+              className="w-fit h-full objec"
               priority={index === 0}
             />
             <figcaption className="hidden">
