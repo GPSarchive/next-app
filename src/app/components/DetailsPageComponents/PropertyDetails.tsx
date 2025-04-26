@@ -1,5 +1,7 @@
-import React from 'react';
-import styles from '@/app/components/DetailsPageComponents/propertyDetails.module.css';
+'use client';
+
+import React, { useEffect, useRef, useState } from 'react';
+
 type PropertyDetailsProps = {
   property: {
     category?: string;
@@ -20,6 +22,27 @@ type PropertyDetailsProps = {
 };
 
 export default function PropertyDetails({ property }: PropertyDetailsProps) {
+  const containerRef = useRef<HTMLUListElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect(); // Disconnect after first trigger
+        }
+      },
+      { threshold: 0.2 }
+    );
+
+    observer.observe(containerRef.current);
+
+    return () => observer.disconnect();
+  }, []);
+
   const propertyInfo = [
     { icon: '🏠', label: 'Κατηγορία', value: property.category },
     { icon: '💲', label: 'Τιμή', value: property.price },
@@ -41,23 +64,39 @@ export default function PropertyDetails({ property }: PropertyDetailsProps) {
   ];
 
   return (
-    <ul className={styles.detailsList}>
+    <ul ref={containerRef} className="list-none p-0 m-0 grid grid-cols-2 gap-2">
       {propertyInfo.map((item, index) => (
-        <li key={`info-${index}`} className={styles.detailItem}>
-          <span className={styles.icon}>{item.icon}</span>
-          <span className={styles.text}>
-            <strong>{item.label}:</strong> {item.value ?? '—'}
+        <li
+          key={`info-${index}`}
+          className="flex items-center relative py-3 text-base font-medium"
+        >
+          <span className="w-10 h-10 flex items-center justify-center text-lg font-bold bg-black text-white rounded-full mr-4">
+            {item.icon}
           </span>
-          <div className={styles.underline} />
+          <span className="flex-1 relative">
+            <strong>{item.label}:</strong> {item.value ?? '—'}
+            <div
+              className={`absolute bottom-[-2px] left-0 h-[2px] bg-black transition-all duration-1000 ${
+                isVisible ? 'w-full' : 'w-0'
+              }`}
+            ></div>
+          </span>
         </li>
       ))}
 
       {additionalCharacteristics.map((item, index) => (
-        <li key={`extra-${index}`} className={styles.detailItem}>
-          <span className={styles.text}>
+        <li
+          key={`extra-${index}`}
+          className="flex items-center relative py-3 text-base font-medium"
+        >
+          <span className="flex-1 relative">
             <strong>{item.label}:</strong> {item.value ?? '—'}
+            <div
+              className={`absolute bottom-[-2px] left-0 h-[2px] bg-black transition-all duration-700 ${
+                isVisible ? 'w-full' : 'w-0'
+              }`}
+            ></div>
           </span>
-          <div className={styles.underline} />
         </li>
       ))}
     </ul>

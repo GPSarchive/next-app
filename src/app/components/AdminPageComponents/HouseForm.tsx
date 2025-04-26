@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { House } from '@/app/types/house';
-import styles from '@/app/components/AdminPageComponents/adminHouseForm.module.css';
 
 interface User {
   uid: string;
@@ -25,6 +24,8 @@ export default function HouseForm({ house, users, onSave, onCancel }: HouseFormP
       description: '',
       price: '',
       bedrooms: 0,
+      bathrooms: 0,
+      rooms: 0,
       category: '',
       energyClass: '',
       floor: '',
@@ -36,6 +37,7 @@ export default function HouseForm({ house, users, onSave, onCancel }: HouseFormP
       location: { latitude: 0, longitude: 0 },
       parking: '',
       size: '',
+      isFeatured: false,
       specialFeatures: '',
       suitableFor: '',
       windowType: '',
@@ -46,7 +48,6 @@ export default function HouseForm({ house, users, onSave, onCancel }: HouseFormP
     }
   );
 
-  // Sync when editing a different house
   useEffect(() => {
     setFormData(
       house || {
@@ -55,6 +56,8 @@ export default function HouseForm({ house, users, onSave, onCancel }: HouseFormP
         description: '',
         price: '',
         bedrooms: 0,
+        bathrooms: 0,
+        rooms: 0,
         category: '',
         energyClass: '',
         floor: '',
@@ -66,6 +69,7 @@ export default function HouseForm({ house, users, onSave, onCancel }: HouseFormP
         location: { latitude: 0, longitude: 0 },
         parking: '',
         size: '',
+        isFeatured: false,
         specialFeatures: '',
         suitableFor: '',
         windowType: '',
@@ -126,91 +130,123 @@ export default function HouseForm({ house, users, onSave, onCancel }: HouseFormP
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Prepare final payload: strip out transient fields, ensure location and allowedUsers are correct
     const dataToSave: House = {
       ...formData,
       location: { latitude: formData.latitude, longitude: formData.longitude },
       allowedUsers: formData.isPublic ? [] : formData.allowedUsers,
     };
-
     onSave(dataToSave);
   };
 
   return (
-    <form onSubmit={handleSubmit} className={styles.form}>
-      {/* Basic fields */}
-      <label>
-        Title:
+    <form onSubmit={handleSubmit} className="max-w-2xl mx-auto space-y-6 bg-white p-6 rounded-lg shadow-md">
+      {/* Title */}
+      <label className="block space-y-1">
+        <span className="font-bold">Title:</span>
         <input
           type="text"
           name="title"
           value={formData.title}
           onChange={handleChange}
+          className="border rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </label>
 
-      <label>
-        Description:
+      {/* Description */}
+      <label className="block space-y-1">
+        <span className="font-bold">Description:</span>
         <textarea
           name="description"
           value={formData.description}
           onChange={handleChange}
+          className="border rounded p-2 w-full h-32 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </label>
 
-      <label>
-        Price:
+      {/* Price */}
+      <label className="block space-y-1">
+        <span className="font-bold">Price:</span>
         <input
           type="text"
           name="price"
           value={formData.price}
           onChange={handleChange}
+          className="border rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </label>
 
-      <label>
-        Bedrooms:
-        <input
-          type="number"
-          name="bedrooms"
-          value={formData.bedrooms}
-          onChange={handleChange}
-        />
-      </label>
+      {/* Bedrooms, Bathrooms, Rooms */}
+      <div className="grid grid-cols-3 gap-4">
+        <label className="block space-y-1">
+          <span className="font-bold">Bedrooms:</span>
+          <input
+            type="number"
+            name="bedrooms"
+            value={formData.bedrooms}
+            onChange={handleChange}
+            className="border rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </label>
+        <label className="block space-y-1">
+          <span className="font-bold">Bathrooms:</span>
+          <input
+            type="number"
+            name="bathrooms"
+            value={formData.bathrooms}
+            onChange={handleChange}
+            className="border rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </label>
+        <label className="block space-y-1">
+          <span className="font-bold">Rooms:</span>
+          <input
+            type="number"
+            name="rooms"
+            value={formData.rooms}
+            onChange={handleChange}
+            className="border rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </label>
+      </div>
 
-      <label>
-        Category:
+      {/* Category */}
+      <label className="block space-y-1">
+        <span className="font-bold">Category:</span>
         <input
           type="text"
           name="category"
           value={formData.category}
           onChange={handleChange}
+          className="border rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </label>
 
-      <label>
-        Energy Class:
+      {/* Energy Class */}
+      <label className="block space-y-1">
+        <span className="font-bold">Energy Class:</span>
         <input
           type="text"
           name="energyClass"
           value={formData.energyClass}
           onChange={handleChange}
+          className="border rounded p-2 w-full 🙂 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </label>
 
-      <label>
-        Floor:
+      {/* Floor */}
+      <label className="block space-y-1">
+        <span className="font-bold">Floor:</span>
         <input
           type="text"
           name="floor"
           value={formData.floor}
           onChange={handleChange}
+          className="border rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </label>
 
-      <label>
-        Has Heating:
+      {/* Has Heating */}
+      <label className="flex items-center space-x-2">
         <input
           type="checkbox"
           name="hasHeating"
@@ -222,171 +258,219 @@ export default function HouseForm({ house, users, onSave, onCancel }: HouseFormP
             }))
           }
         />
+        <span>Has Heating</span>
       </label>
 
-      <label>
-        Heating Type:
+      {/* Heating Type */}
+      <label className="block space-y-1">
+        <span className="font-bold">Heating Type:</span>
         <input
           type="text"
           name="heatingType"
           value={formData.heatingType}
           onChange={handleChange}
+          className="border rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </label>
 
-      <label>
-        Kitchens:
+      {/* Kitchens */}
+      <label className="block space-y-1">
+        <span className="font-bold">Kitchens:</span>
         <input
           type="text"
           name="kitchens"
           value={formData.kitchens}
           onChange={handleChange}
+          className="border rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </label>
 
-      <label>
-        Latitude:
-        <input
-          type="number"
-          name="latitude"
-          value={formData.latitude}
-          onChange={handleChange}
-        />
-      </label>
+      {/* Latitude and Longitude */}
+      <div className="grid grid-cols-2 gap-4">
+        <label className="block space-y-1">
+          <span className="font-bold">Latitude:</span>
+          <input
+            type="number"
+            name="latitude"
+            value={formData.latitude}
+            onChange={handleChange}
+            className="border rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </label>
+        <label className="block space-y-1">
+          <span className="font-bold">Longitude:</span>
+          <input
+            type="number"
+            name="longitude"
+            value={formData.longitude}
+            onChange={handleChange}
+            className="border rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </label>
+      </div>
 
-      <label>
-        Longitude:
-        <input
-          type="number"
-          name="longitude"
-          value={formData.longitude}
-          onChange={handleChange}
-        />
-      </label>
-
-      <label>
-        Parking:
+      {/* Parking */}
+      <label className="block space-y-1">
+        <span className="font-bold">Parking:</span>
         <input
           type="text"
           name="parking"
           value={formData.parking}
           onChange={handleChange}
+          className="border rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </label>
 
-      <label>
-        Size:
+      {/* Size */}
+      <label className="block space-y-1">
+        <span className="font-bold">Size:</span>
         <input
           type="text"
           name="size"
           value={formData.size}
           onChange={handleChange}
+          className="border rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </label>
 
-      <label>
-        Special Features:
+      {/* Special Features */}
+      <label className="block space-y-1">
+        <span className="font-bold">Special Features:</span>
         <input
           type="text"
           name="specialFeatures"
           value={formData.specialFeatures}
           onChange={handleChange}
+          className="border rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </label>
 
-      <label>
-        Suitable For:
+      {/* Suitable For */}
+      <label className="block space-y-1">
+        <span className="font-bold">Suitable For:</span>
         <input
           type="text"
           name="suitableFor"
           value={formData.suitableFor}
           onChange={handleChange}
+          className="border rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </label>
 
-      <label>
-        Window Type:
+      {/* Window Type */}
+      <label className="block space-y-1">
+        <span className="font-bold">Window Type:</span>
         <input
           type="text"
           name="windowType"
           value={formData.windowType}
           onChange={handleChange}
+          className="border rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </label>
 
-      <label>
-        Year Built:
+      {/* Year Built */}
+      <label className="block space-y-1">
+        <span className="font-bold">Year Built:</span>
         <input
           type="text"
           name="yearBuilt"
           value={formData.yearBuilt}
           onChange={handleChange}
+          className="border rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </label>
 
-      {/* Public toggle */}
-      <label>
-        Is Public:
+      {/* Featured Listing */}
+      <label className="flex items-center space-x-2">
+        <input
+          type="checkbox"
+          name="isFeatured"
+          checked={formData.isFeatured}
+          onChange={handleCheckboxChange}
+        />
+        <span>Featured Listing</span>
+      </label>
+
+      {/* Is Public */}
+      <label className="flex items-center space-x-2">
         <input
           type="checkbox"
           name="isPublic"
           checked={formData.isPublic}
           onChange={handleCheckboxChange}
         />
+        <span>Is Public</span>
       </label>
 
       {/* Allowed Users */}
       {!formData.isPublic && (
-        <fieldset className={styles.allowedUsers}>
-          <legend>Allowed Users</legend>
-          {users.map(u => (
-            <div key={u.uid} className={styles.userRow}>
-              <label>
+        <fieldset className="border p-4 rounded">
+          <legend className="font-bold">Allowed Users</legend>
+          <div className="space-y-2">
+            {users.map(u => (
+              <label key={u.uid} className="flex items-center space-x-2">
                 <input
                   type="checkbox"
                   checked={formData.allowedUsers.includes(u.uid)}
                   onChange={() => handleToggleUser(u.uid)}
                 />
-                {u.displayName || u.email}
+                <span>{u.displayName || u.email}</span>
               </label>
-            </div>
-          ))}
+            ))}
+          </div>
         </fieldset>
       )}
 
       {/* Images */}
-      <h3>Images</h3>
+      <h3 className="text-xl font-bold mt-6">Images</h3>
       {formData.images.map((image, index) => (
-        <div key={index} className={styles.imageRow}>
-          <label>
-            Src:
+        <div key={index} className="flex space-x-4 items-center mt-2">
+          <label className="flex-1">
+            <span className="sr-only">Image Src</span>
             <input
               type="text"
+              placeholder="Image Src"
               value={image.src}
               onChange={e => handleImageChange(index, 'src', e.target.value)}
+              className="border rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </label>
-          <label>
-            Alt:
+          <label className="flex-1">
+            <span className="sr-only">Image Alt</span>
             <input
               type="text"
+              placeholder="Image Alt"
               value={image.alt}
               onChange={e => handleImageChange(index, 'alt', e.target.value)}
+              className="border rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </label>
-          <button type="button" onClick={() => removeImage(index)}>
-            Remove Image
+          <button
+            type="button"
+            onClick={() => removeImage(index)}
+            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+          >
+            Remove
           </button>
         </div>
       ))}
-      <button type="button" onClick={addImage}>
+      <button
+        type="button"
+        onClick={addImage}
+        className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 mt-4"
+      >
         Add Image
       </button>
 
-      {/* Actions */}
-      <div className={styles.actions}>
-        <button type="submit">Save</button>
-        <button type="button" onClick={onCancel}>Cancel</button>
+      {/* Form Actions */}
+      <div className="flex justify-end space-x-4 mt-6">
+        <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+          Save
+        </button>
+        <button type="button" onClick={onCancel} className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+          Cancel
+        </button>
       </div>
     </form>
   );

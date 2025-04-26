@@ -1,3 +1,4 @@
+// app/components/DetailsPageComponents/Gallery.tsx
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
@@ -6,100 +7,120 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/free-mode";
-import "swiper/css/effect-fade";
 import { Navigation, FreeMode, Autoplay } from "swiper/modules";
-import Modal from "./Modal"; // Ensure you have a Modal component in the same folder
+import { motion } from "framer-motion";
+import Modal from "./Modal";
 
-import styles from "./Gallery.module.css";
+export interface GalleryImage { src: string; alt: string; }
+interface GalleryProps { images: GalleryImage[]; }
 
-// Define a type for your image objects
-export interface GalleryImage {
-  src: string;
-  alt: string;
-}
-
-interface GalleryProps {
-  images: GalleryImage[];
-}
+const thumbVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { delay: i * 0.05, duration: 0.4, ease: "easeOut" },
+  }),
+};
 
 export default function Gallery({ images }: GalleryProps) {
-  const [selectedIndex, setSelectedIndex] = useState<number>(0);
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const mainSwiperRef = useRef<any>(null);
   const thumbSwiperRef = useRef<any>(null);
 
   useEffect(() => {
-    if (mainSwiperRef.current && thumbSwiperRef.current) {
-      thumbSwiperRef.current.slideToLoop(selectedIndex, 600);
-    }
+    thumbSwiperRef.current?.slideToLoop(selectedIndex, 600);
   }, [selectedIndex]);
 
+  useEffect(() => {
+    if (!mainSwiperRef.current) return;
+    isModalOpen
+      ? mainSwiperRef.current.autoplay.stop()
+      : mainSwiperRef.current.autoplay.start();
+  }, [isModalOpen]);
+
+  const showPrev = () => {
+    const prev = (selectedIndex - 1 + images.length) % images.length;
+    setSelectedIndex(prev);
+    mainSwiperRef.current?.slideToLoop(prev);
+  };
+  const showNext = () => {
+    const next = (selectedIndex + 1) % images.length;
+    setSelectedIndex(next);
+    mainSwiperRef.current?.slideToLoop(next);
+  };
+
   return (
-    <div className={styles.container}>
+    <div className="flex flex-col items-center  max-w-[100%] mx-auto bg-[#D6D2C4]">
       {/* Main Carousel */}
-      <div className={styles.mainCarouselContainer}>
+      <div className="w-full h-[800px] overflow-hidden">
         <Swiper
-          onSwiper={(swiper) => (mainSwiperRef.current = swiper)}
-          onSlideChange={(swiper) => setSelectedIndex(swiper.realIndex)}
-          navigation={true}
-          loop={true}
-          autoplay={{
-            delay: 4000,
-            disableOnInteraction: false,
-          }}
-          speed={600}
-          modules={[Navigation, Autoplay]}
-          className={styles.mainCarousel}
+          onSwiper={(s) => (mainSwiperRef.current = s)}
+          onSlideChange={(s) => setSelectedIndex(s.realIndex)}
+          navigation loop autoplay={{ delay: 4000, disableOnInteraction: false }}
+          speed={600} modules={[Navigation, Autoplay]}
+          className="w-full h-full"
         >
-          {images.map((image, index) => (
-            <SwiperSlide style={{ width: "100px" }} key={index} onClick={() => setIsModalOpen(true)}>
-              <Image
-                src={image.src}
-                alt={image.alt}
-                width={600}
-                height={400}
-                className={styles.mainImage}
-              />
+          {images.map((img, i) => (
+            <SwiperSlide key={i}>
+              <div onClick={() => setIsModalOpen(true)} className="w-full h-full">
+                <Image
+                  src={img.src} alt={img.alt}
+                  width={600} height={400}
+                  className="object-cover w-full h-full rounded-sm cursor-pointer"
+                />
+              </div>
             </SwiperSlide>
           ))}
         </Swiper>
       </div>
 
       {/* Thumbnail Carousel */}
-      <div className={styles.thumbnailWrapper}>
+      <div className="w-full h-full bg-[#D6D2C4]/50 py-4 px-2">
         <Swiper
-          onSwiper={(swiper) => (thumbSwiperRef.current = swiper)}
-          
-          freeMode={true}
-          slidesPerView={6}
-          spaceBetween={1}
-          loop={true}
+          onSwiper={(s) => (thumbSwiperRef.current = s)}
+          freeMode slidesPerView={6} spaceBetween={8} loop
           modules={[FreeMode]}
-          className={styles.thumbnailContainer}
+          className="h-[1000%]"
         >
-          {images.map((image, index) => (
-            <SwiperSlide key={index}>
-              <div
-                onClick={() => {
-                  setSelectedIndex(index);
-                  if (mainSwiperRef.current) {
-                    mainSwiperRef.current.slideToLoop(index);
-                  }
-                }}
-                className={`${styles.thumbnail} ${
-                  selectedIndex === index ? styles.selectedThumbnail : ""
-                }`}
-              >
-                <Image
-                  src={image.src}
-                  alt={image.alt}
-                  fill={true}
-                  
-                  className={styles.thumbnailImage}
-                />
-              </div>
-            </SwiperSlide>
-          ))}
+          {images.map((img, idx) => {
+            const isSelected = idx === selectedIndex;
+            return (
+              <SwiperSlide key={idx}>
+                <motion.div
+                  custom={idx}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: false, amount: 0.3, root: thumbSwiperRef.current?.el }}
+                  variants={thumbVariants}
+                  onClick={() => {
+                    setSelectedIndex(idx);
+                    mainSwiperRef.current?.slideToLoop(idx);
+                  }}
+                  className={`
+                    relative
+                    aspect-square
+                    w-full
+                    cursor-pointer
+                    overflow-hidden
+                    transition-transform duration-300 ease-in-out
+                    border-2
+                    ${isSelected
+                      ? "border-black p-1 shadow-[0_4px_10px_rgba(0,0,0,0.3)] scale-110"
+                      : "border-transparent"}
+                  `}
+                >
+                   <Image
+                    src={img.src} alt={img.alt}
+                    fill
+                    loading="eager"
+                    className={`object-cover ${isSelected ? "scale-110" : ""}`}
+                  />
+                </motion.div>
+              </SwiperSlide>
+            );
+          })}
         </Swiper>
       </div>
 
@@ -108,6 +129,8 @@ export default function Gallery({ images }: GalleryProps) {
         isOpen={isModalOpen}
         image={images[selectedIndex]}
         onClose={() => setIsModalOpen(false)}
+        onPrev={showPrev}
+        onNext={showNext}
       />
     </div>
   );

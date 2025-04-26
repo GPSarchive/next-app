@@ -8,8 +8,6 @@ import Slider, { Settings as SlickSettings } from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 
-import styles from '@/app/components/ListingsPageComponents/HouseCarousel.module.css';
-
 type HouseImage = {
   src: string;
   alt?: string;
@@ -33,7 +31,7 @@ type ArrowProps = {
 
 const CustomPrevArrow = ({ onClick }: ArrowProps) => (
   <button
-    className={`${styles.arrow} ${styles.prevArrow}`}
+    className="absolute top-1/2 left-2.5 transform -translate-y-1/2 bg-transparent text-white rounded-full w-10 h-10 flex items-center justify-center cursor-pointer transition-colors duration-300 z-10 hover:bg-black/80"
     onClick={onClick}
     aria-label="Previous Slide"
   >
@@ -42,7 +40,7 @@ const CustomPrevArrow = ({ onClick }: ArrowProps) => (
       height="30"
       viewBox="0 0 24 24"
       fill="none"
-      stroke="white"
+      stroke="currentColor"
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -54,7 +52,7 @@ const CustomPrevArrow = ({ onClick }: ArrowProps) => (
 
 const CustomNextArrow = ({ onClick }: ArrowProps) => (
   <button
-    className={`${styles.arrow} ${styles.nextArrow}`}
+    className="absolute top-1/2 right-2.5 transform -translate-y-1/2 bg-transparent text-white rounded-full w-10 h-10 flex items-center justify-center cursor-pointer transition-colors duration-300 z-10 hover:bg-black/80"
     onClick={onClick}
     aria-label="Next Slide"
   >
@@ -63,7 +61,7 @@ const CustomNextArrow = ({ onClick }: ArrowProps) => (
       height="30"
       viewBox="0 0 24 24"
       fill="none"
-      stroke="white"
+      stroke="currentColor"
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -91,34 +89,50 @@ const HouseCarousel = ({ house, onHover }: HouseCarouselProps) => {
   };
 
   return (
-    <Link href={`/houses/${house.id}`}>
-      <a
-        className={styles.carousel}
-        onMouseEnter={() => onHover(house)}
-      >
-        <Slider {...settings}>
-          {house.images.map((img, index) => (
-            <figure key={index} className={styles.carouselSlide}>
-              <Image
-                src={img.src}
-                alt={img.alt ?? `${house.title} — image ${index + 1}`}
-                width={1200}
-                height={800}
-                className={styles.carouselImage}
-                priority={index === 0}
-              />
-              <figcaption className="sr-only">
-                {house.title} — {house.price}
-              </figcaption>
-              <div className={styles.gradientOverlay} />
-            </figure>
-          ))}
-        </Slider>
-        <div className={styles.overlay}>
-          <h3>{house.title}</h3>
-          <p>{house.price}</p>
-        </div>
-      </a>
+    <Link
+      href={`/houses/${house.id}`}
+      className="group relative w-full overflow-hidden rounded-lg border-[0px] border-black shadow-lg"
+      onMouseEnter={() => onHover(house)}
+    >
+      <Slider {...settings}>
+        {house.images.map((img, index) => (
+          <figure
+            key={index}
+            className="relative w-full h-64 overflow-hidden -mb-[10px] p-0 flex items-center justify-center rounded-lg"
+          >
+            <Image
+              src={img.src}
+              alt={img.alt ?? `${house.title} — image ${index + 1}`}
+              width={1200}
+              height={800}
+              className="w-full h-full objec"
+              priority={index === 0}
+            />
+            <figcaption className="hidden">
+              {house.title} — {house.price}
+            </figcaption>
+            <div
+            className="
+              absolute bottom-0 left-0 w-full h-16
+              bg-gradient-to-t from-black/80 to-transparent
+              pointer-events-none rounded-b-lg
+              opacity-0
+              transition-opacity duration-300 ease-in-out
+               group-hover:opacity-100" />
+          </figure>
+        ))}
+      </Slider>
+
+        <div className="
+        absolute bottom-0 left-0 w-full
+        bg-gradient-to-t from-black/80 to-transparent 
+        text-white p-2.5
+        opacity-0 transition-opacity duration-300 ease-in-out
+        group-hover:opacity-100"
+        >
+        <h3 className="text-lg font-semibold">{house.title}</h3>
+        <p className="text-sm">{house.price}</p>
+      </div>
     </Link>
   );
 };

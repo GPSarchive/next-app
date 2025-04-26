@@ -1,15 +1,9 @@
-// HouseGrid.tsx
+// components/HouseGrid.tsx
 'use client';
 
-import { motion, Variants } from "framer-motion";
-import HouseCarousel from "@/app/components/ListingsPageComponents/HouseCarousel";
-import { House } from "@/app/types/house";
-import styles from "@/app/components/ListingsPageComponents/HouseGrid.module.css"; // make sure your CSS module is imported
-
-type Props = {
-  houses: House[];
-  onHover?: (house: House) => void;
-};
+import { motion, Variants } from 'framer-motion';
+import HouseCarousel from './HouseCarousel';
+import { House } from '@/app/types/house';
 
 const gridItemVariants: Variants = {
   hidden: { opacity: 0, y: 50 },
@@ -19,14 +13,29 @@ const gridItemVariants: Variants = {
     transition: {
       delay: index * 0.1,
       duration: 0.8,
-      ease: "easeOut",
+      ease: 'easeOut',
     },
   }),
 };
 
-const HouseGrid = ({ houses, onHover }: Props) => {
-  return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 p-1 w-full">
+type Props = {
+  houses: House[];
+  onHover?: (house: House) => void;
+};
+
+const HouseGrid: React.FC<Props> = ({ houses, onHover }) => (
+  <div
+    className="w-full h-full overflow-y-scroll hide-scrollbar"
+    style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+  >
+    <style jsx global>{`
+      .hide-scrollbar::-webkit-scrollbar { display: none; }
+    `}</style>
+
+<div
+      className="grid grid-cols-1 lg:grid-cols-3 gap-6 p-1 w-full hide-scrollbar"
+      >
+
       {houses.map((house, index) => (
         <motion.div
           key={house.id}
@@ -35,13 +44,15 @@ const HouseGrid = ({ houses, onHover }: Props) => {
           variants={gridItemVariants}
           custom={index}
           onMouseEnter={() => onHover?.(house)}
-          className={`${!house.isPublic ? styles.goldOutline : ''}`} // Apply gold outline if isPublic is false
+          className={`rounded-lg transition-shadow duration-200 hover:shadow-lg border-[0.5px] border-black ${
+            !house.isPublic ? 'border-2 border-yellow-400' : ''
+          } h-full`}
         >
           <HouseCarousel house={house} onHover={() => onHover?.(house)} />
         </motion.div>
       ))}
     </div>
-  );
-};
+  </div>
+);
 
 export default HouseGrid;

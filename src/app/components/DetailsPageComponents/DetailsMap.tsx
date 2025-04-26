@@ -1,83 +1,94 @@
-// src/app/components/DetailsPageComponents/DetailsMap.js
 'use client';
 
 import { useState } from 'react';
-import Map, { Marker, NavigationControl, Source, Layer } from 'react-map-gl/maplibre';
+import Map, {
+  Marker,
+  NavigationControl,
+  Source,
+  Layer,
+  type ViewState
+} from 'react-map-gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { SlLocationPin } from 'react-icons/sl';
 
 interface DetailsMapProps {
-  latitude: number;
-  longitude: number;
+  location: {
+    latitude: number;
+    longitude: number;
+  };
   title: string;
 }
 
-export default function DetailsMap({ latitude, longitude, title }: DetailsMapProps) {
-  const [mapLoaded, setMapLoaded] = useState(false);
-
-  const viewState = {
+export default function DetailsMap({
+  location: { latitude, longitude },
+}: DetailsMapProps) {
+  // Now including padding (number or PaddingOptions) in the type
+  const [viewState, setViewState] = useState<ViewState>({
     latitude,
     longitude,
     zoom: 12,
-  };
+    pitch: 0,
+    bearing: 0,
+    padding: {
+      top: 0,
+      bottom: 0,
+      left: 0,
+      right: 0,
+    },
+  });
+
+  const [mapLoaded, setMapLoaded] = useState(false);
 
   return (
-    <div className="w-full h-full relative">
+    <div className="w-full h-full relative rounded border-[1.5px] border-black overflow-hidden">
       <Map
-        {...viewState}
+        initialViewState={viewState}              // ← Partial<ViewState> is fine here
+        onMove={evt => setViewState(evt.viewState)}
+        style={{ width: '100%', height: '100%' }}
+        // **Use the exact same Stadia satellite style URL**
+        mapStyle="https://tiles.stadiamaps.com/styles/alidade_satellite.json??api_key=37c5a6d2-4f8e-4fa6-ab87-717011524156"
         attributionControl={{ compact: true }}
         onLoad={() => setMapLoaded(true)}
-        style={{ width: '100%', height: '100%' }}
-        mapStyle="/alidade_smooth_custom.json"
       >
         <NavigationControl position="top-right" />
 
-        {/* Single non-interactive marker */}
+        {/* Property marker */}
         {latitude != null && longitude != null && (
           <Marker longitude={longitude} latitude={latitude}>
             <SlLocationPin className="text-red-600 text-3xl" />
           </Marker>
         )}
 
-        {/* Tile Layer */}
+        {/* (Optional) If you still want to manually add the raster tiles
+            instead of relying on the style's built-in source, you can
+            reuse exactly the same Source + Layer: */}
         {mapLoaded && (
           <Source
-            id="stadiamaps-tiles"
+            id="stadiamaps-sat-tiles"
             type="raster"
             tiles={[
-              'https://tiles.stadiamaps.com/tiles/osm_bright/{z}/{x}/{y}{r}.png?api_key=f7f2bfb3-a0a2-4cb3-8639-6bb622864439',
+              'https://tiles.stadiamaps.com/tiles/alidade_satellite/{z}/{x}/{y}{r}.jpg?api_key=37c5a6d2-4f8e-4fa6-ab87-717011524156'
             ]}
             tileSize={256}
           >
-            <Layer id="stadiamaps-layer" type="raster" />
-          </Source>
-        )}
-
-        {/* 3D Buildings Layer */}
-        {mapLoaded && (
-          <Source
-            id="maptiler-buildings"
-            type="vector"
-            tiles={[
-              'https://api.maptiler.com/tiles/3d-buildings/{z}/{x}/{y}.pbf?key=hEibyRgEwQNk9pgczY75',
-            ]}
-          >
             <Layer
-              id="3d-buildings"
-              source="mapbox-buildings"
-              source-layer="building"
-              type="fill-extrusion"
-              minzoom={15}
-              paint={{
-                'fill-extrusion-color': '#aaa',
-                'fill-extrusion-height': ['get', 'height'],
-                'fill-extrusion-base': ['get', 'min_height'],
-                'fill-extrusion-opacity': 0.6,
-              }}
+              id="stadiamaps-sat-layer"
+              type="raster"
+              paint={{ 'raster-opacity': 1 }}
             />
           </Source>
         )}
       </Map>
+
+      {/* View on Maps button */}
+      <a
+        href={`https://www.google.com/maps?q=${latitude},${longitude}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="absolute bottom-4 left-4 bg-white bg-opacity-50 hover:bg-opacity-75 text-black text-sm font-medium px-3 py-1 rounded shadow transition"
+      >
+        View on maps
+      </a>
     </div>
   );
 }

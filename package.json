@@ -25,7 +25,8 @@
     "react-map-gl": "^8.0.2",
     "react-slick": "^0.30.3",
     "slick-carousel": "^1.8.1",
-    "swiper": "^11.2.6"
+    "swiper": "^11.2.6",
+    "tailwind-scrollbar-hide": "^2.0.0"
   },
   "devDependencies": {
     "@types/cookie": "^0.6.0",

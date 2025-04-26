@@ -59,7 +59,7 @@ const MapComponent = ({
     <div className="w-full h-full relative">
       <Map
         {...viewState}
-        mapStyle="/alidade_smooth_custom.json"
+        mapStyle="https://tiles.stadiamaps.com/styles/alidade_satellite.json??api_key=37c5a6d2-4f8e-4fa6-ab87-717011524156"
         style={{ width: "100%", height: "100%" }}
         attributionControl={{ compact: true }}
         onLoad={() => setMapLoaded(true)}
@@ -114,41 +114,19 @@ const MapComponent = ({
 
         {/* ✅ Custom Raster Layer */}
         {mapLoaded && (
-          <Source
-            id="stadiamaps-tiles"
-            type="raster"
-            tiles={[
-              "https://tiles.stadiamaps.com/tiles/osm_bright/{z}/{x}/{y}{r}.png?api_key=f7f2bfb3-a0a2-4cb3-8639-6bb622864439",
-            ]}
-            tileSize={256}
-          >
-            <Layer id="stadiamaps-layer" type="raster" />
-          </Source>
+           <Source
+                 id="stadiamaps-sat-tiles"
+                 type="raster"
+                 tiles={[
+                   "https://tiles.stadiamaps.com/tiles/alidade_satellite/{z}/{x}/{y}{r}.jpg?api_key=37c5a6d2-4f8e-4fa6-ab87-717011524156",
+                 ]}
+                 tileSize={256}
+               >
+                 <Layer id="stadiamaps-sat-layer" type="raster" paint={{ "raster-opacity": 1 }} />
+               </Source>
         )}
 
-        {/* ✅ 3D Buildings Layer */}
-        {mapLoaded && (
-          <Source
-            id="maptiler-buildings"
-            type="vector"
-            tiles={[
-              "https://api.maptiler.com/tiles/3d-buildings/{z}/{x}/{y}.pbf?key=hEibyRgEwQNk9pgczY75",
-            ]}
-          >
-            <Layer
-              id="3d-buildings"
-              source-layer="building"
-              type="fill-extrusion"
-              minzoom={15}
-              paint={{
-                "fill-extrusion-color": "#aaa",
-                "fill-extrusion-height": ["get", "height"],
-                "fill-extrusion-base": ["get", "min_height"],
-                "fill-extrusion-opacity": 0.6,
-              }}
-            />
-          </Source>
-        )}
+        
       </Map>
     </div>
   );

@@ -1,8 +1,8 @@
+// app/components/DetailsPageComponents/PropertyDescription.tsx
 'use client';
 
 import React, { useState, useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
-import styles from '@/app/components/DetailsPageComponents/PropertyDescription.module.css';
 
 type PropertyDescriptionProps = {
   description: string;
@@ -18,18 +18,19 @@ export default function PropertyDescription({ description }: PropertyDescription
 
   return (
     <div
-      className={styles.descriptionWrapper}
       ref={containerRef}
-      style={{ maxHeight: isExpanded ? '1000px' : '1000px' }}
+      className="relative pb-8 max-h-[1000px] transition-all"
     >
-      <h2 className={styles.descTitle}>Περιγραφή</h2>
+      <h2 className="mb-3 text-[1.4rem] font-semibold text-[#111] tracking-wide capitalize">
+        Περιγραφή
+      </h2>
 
       {visibleParagraphs.map((paragraph, index) => (
         <motion.p
           key={index}
-          className={styles.paragraph}
+          className="mb-4 font-normal text-[#444] text-justify whitespace-pre-line"
           initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.6, delay: index * 0.2, ease: 'easeOut' }}
         >
           {paragraph}
@@ -37,7 +38,10 @@ export default function PropertyDescription({ description }: PropertyDescription
       ))}
 
       {paragraphs.length > 3 && (
-        <button className={styles.readMoreButton} onClick={() => setIsExpanded(!isExpanded)}>
+        <button
+          className="mt-2 text-base font-semibold text-black hover:opacity-70 transition-opacity"
+          onClick={() => setIsExpanded(!isExpanded)}
+        >
           {isExpanded ? 'Read Less' : 'Read More'}
         </button>
       )}

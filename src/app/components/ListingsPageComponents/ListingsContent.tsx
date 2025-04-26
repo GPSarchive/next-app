@@ -6,8 +6,6 @@ import { functions, auth } from '@/app/firebase/firebaseConfig';
 import { onAuthStateChanged } from 'firebase/auth';
 import HouseGridWrapper from '@/app/components/ListingsPageComponents/HouseGridWrapper';
 import ClientMapWrapper from '@/app/components/ListingsPageComponents/ClientMapWrapper';
-import FiltersWrapper from '@/app/components/ListingsPageComponents/FiltersWrapper';
-import styles from '@/app/components/ListingsPageComponents/HousesMapPage.module.css';
 import { House } from '@/app/types/house';
 
 type Props = {
@@ -53,12 +51,13 @@ export default function ListingsContent({ initialHouses }: Props) {
   if (houses.length === 0) return <div>No houses found.</div>;
 
   return (
-    <div className={styles.content}>
-      <div className={styles.leftPanel}>
-        <FiltersWrapper resultsCount={houses.length} />
+    <div className="flex flex-1 overflow-hidden">
+      <div className="flex-[0.95] overflow-y-scroll scrollbar-hide p-5 bg-[#D6D2C4] relative shadow-[10px_0px_20px_rgba(0,0,0,0.15)] z-20">
         <HouseGridWrapper houses={houses} />
+        {/* Gradient overlay for softer transition */}
+        <div className="pointer-events-none absolute top-0 -right-2 w-5 h-full bg-gradient-to-l from-[rgba(0,0,0,0.15)] to-transparent" />
       </div>
-      <div className={styles.rightPanel}>
+      <div className="flex-1 h-full relative z-10">
         <ClientMapWrapper houses={houses} />
       </div>
     </div>

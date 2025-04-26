@@ -5,6 +5,7 @@ export type House = {
   price: string;
   category: string;
   bedrooms: number;
+  bathrooms: number;
   kitchens: string;
   floor: string;
   size: string;
@@ -16,8 +17,10 @@ export type House = {
   parking: string;
   suitableFor: string;
   specialFeatures: string;
+  isFeatured: boolean;
   latitude: number;
   longitude: number;
+  rooms:number;
   location: {
     latitude: number;
     longitude: number;

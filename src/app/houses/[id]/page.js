@@ -15,11 +15,11 @@ export default async function PropertyPage({ params }) {
     console.error('[PropertyPage] Firebase Admin DB not initialized')
     throw new Error('Internal server error')
   }
-
+  const { id } = await params
   // 1. Fetch the house
   let houseSnap
   try {
-    houseSnap = await adminDb.collection('houses').doc(params.id).get()
+    houseSnap = await adminDb.collection('houses').doc(id).get()
   } catch (err) {
     console.error('[PropertyPage] Error fetching document:', err)
     notFound()
@@ -32,11 +32,6 @@ export default async function PropertyPage({ params }) {
 
   const houseData = houseSnap.data()
 
-  // Sanity: make sure isPublic is boolean
-  if (typeof houseData.isPublic !== 'boolean') {
-    console.error('[PropertyPage] Invalid isPublic field:', houseData.isPublic)
-    notFound()
-  }
 
   // 2. Public → show
   if (houseData.isPublic) {

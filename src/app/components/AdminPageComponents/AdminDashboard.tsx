@@ -5,7 +5,6 @@ import { httpsCallable } from 'firebase/functions';
 import { functions } from '@/app/firebase/firebaseConfig';
 import { House } from '@/app/types/house';
 import HouseForm from '@/app/components/AdminPageComponents/HouseForm';
-import styles from './AdminDashboard.module.css';
 
 interface User {
   uid: string;
@@ -127,42 +126,57 @@ export default function AdminDashboard() {
     }
   };
 
-  if (loading) return <div className={styles.message}>Loading…</div>;
-  if (error)   return <div className={styles.error}>Error: {error}</div>;
+  if (loading) return <div className="max-w-4xl mx-auto p-6 text-center text-gray-500">Loading…</div>;
+  if (error)   return <div className="max-w-4xl mx-auto p-6 text-center text-red-500">Error: {error}</div>;
 
   return (
-    <div className={styles.container}>
-      <h1 className={styles.heading}>Admin Dashboard</h1>
+    <div className="max-w-4xl mx-auto p-6 bg-gray-100">
+      <h1 className="text-2xl font-bold mb-4">Admin Dashboard</h1>
       <button
-        className={styles.buttonAdd}
+        className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mb-4"
         onClick={() => setEditingHouse('new')}
       >
         Add New House
       </button>
 
-      <ul className={styles.houseList}>
+      <ul className="space-y-4">
         {houses.length > 0 ? (
           houses.map(h => (
-            <li key={h.id} className={styles.houseItem}>
+            <li key={h.id} className="flex justify-between items-center p-4 bg-white rounded shadow">
               {h.title || 'Untitled'}
-              <span className={styles.actions}>
-                <button onClick={() => setEditingHouse(h)}>Edit</button>
-                <button onClick={() => deleteHouse(h.id)}>Delete</button>
+              <span className="space-x-2">
+                <button
+                  onClick={() => setEditingHouse(h)}
+                  className="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => deleteHouse(h.id)}
+                  className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
+                >
+                  Delete
+                </button>
               </span>
             </li>
           ))
         ) : (
-          <li>No houses available.</li>
+          <li className="w-full text-center text-gray-500">No houses available.</li>
         )}
       </ul>
 
       {editingHouse !== null && (
-        <HouseForm
-          house={editingHouse === 'new' ? null : editingHouse}
-          users={users}
-          onSave={saveHouse}
-          onCancel={() => setEditingHouse(null)}
-        />
+        <div className="mt-8">
+          <h2 className="text-xl font-bold mb-4">
+            {editingHouse === 'new' ? 'Add New House' : 'Edit House'}
+          </h2>
+          <HouseForm
+            house={editingHouse === 'new' ? null : editingHouse}
+            users={users}
+            onSave={saveHouse}
+            onCancel={() => setEditingHouse(null)}
+          />
+        </div>
       )}
     </div>
   );
