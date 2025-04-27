@@ -8,7 +8,7 @@ export const runtime = 'nodejs';
 
 type RawSearchParams = Partial<{
   category: string
-  bedrooms: string
+  bedrooms: number
   minPrice: string
   maxPrice: string
 }>;
@@ -25,7 +25,7 @@ export default async function SecureListingsPage({
     minPrice: minStr,
     maxPrice: maxStr,
   } = await searchParams;
-  const bedrooms = bStr ? parseInt(bStr, 10) : undefined;
+  const bedrooms = typeof bStr === 'string' ? parseInt(bStr, 10) : undefined;
   const minPrice = minStr ? parseInt(minStr, 10) : undefined;
   const maxPrice = maxStr ? parseInt(maxStr, 10) : undefined;
 
@@ -51,18 +51,29 @@ export default async function SecureListingsPage({
 
   // 3) apply filters in-memory
   let filtered = publicHouses;
+
   if (category) {
     filtered = filtered.filter(h => h.category === category);
   }
+
   if (bedrooms !== undefined) {
-    filtered = filtered.filter(h => h.bedrooms === bedrooms);
+    filtered = filtered.filter(h => {
+      // h.bedrooms is a string like "3" — parse it to a number before comparing
+      const b = typeof h.bedrooms === 'string'
+        ? parseInt(h.bedrooms, 10)
+        : h.bedrooms;
+      return b === bedrooms;
+    });
   }
+
   if (minPrice !== undefined) {
     filtered = filtered.filter(h => parseInt(h.price, 10) >= minPrice);
   }
+
   if (maxPrice !== undefined) {
     filtered = filtered.filter(h => parseInt(h.price, 10) <= maxPrice);
   }
+
 
   return (
     <div className="flex flex-col h-screen overflow-hidden pt-[60px]">

@@ -62,22 +62,7 @@ export default function DetailsMap({
         {/* (Optional) If you still want to manually add the raster tiles
             instead of relying on the style's built-in source, you can
             reuse exactly the same Source + Layer: */}
-        {mapLoaded && (
-          <Source
-            id="stadiamaps-sat-tiles"
-            type="raster"
-            tiles={[
-              'https://tiles.stadiamaps.com/tiles/alidade_satellite/{z}/{x}/{y}{r}.jpg?api_key=37c5a6d2-4f8e-4fa6-ab87-717011524156'
-            ]}
-            tileSize={256}
-          >
-            <Layer
-              id="stadiamaps-sat-layer"
-              type="raster"
-              paint={{ 'raster-opacity': 1 }}
-            />
-          </Source>
-        )}
+        
       </Map>
 
       {/* View on Maps button */}

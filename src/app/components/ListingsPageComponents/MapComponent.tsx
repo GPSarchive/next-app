@@ -5,26 +5,15 @@ import Map, {
   Marker,
   Popup,
   NavigationControl,
-  Source,
-  Layer,
   ViewStateChangeEvent,
 } from "react-map-gl/maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { SlLocationPin } from "react-icons/sl";
 import Image from "next/image";
 import { House } from '@/app/types/house';
 
 // =======================
 // Types
 // =======================
-
-type Location = {
-  latitude: number;
-  longitude: number;
-};
-
-
-
 
 type ViewState = {
   longitude: number;
@@ -78,13 +67,18 @@ const MapComponent = ({
                 e.originalEvent.stopPropagation();
                 setSelectedHouse(house);
               }}
+              anchor="bottom"
             >
-              <SlLocationPin className="text-red-600 text-3xl hover:scale-125 transition-transform duration-200 cursor-pointer" />
+              <img
+                src="/marker.svg"
+                alt="Marker"
+                className="w-8 h-8 hover:scale-125 transition-transform duration-200 cursor-pointer"
+              />
             </Marker>
           ) : null
         )}
 
-        {/* ✅ Popup for selected house */}
+        {/* ✅ Styled Popup for selected house */}
         {selectedHouse &&
           selectedHouse.location?.latitude &&
           selectedHouse.location?.longitude && (
@@ -95,38 +89,43 @@ const MapComponent = ({
               closeOnClick={false}
               onClose={() => setSelectedHouse(null)}
               anchor="top"
+              className="!p-0 !shadow-2xl rounded-xl overflow-hidden"
             >
-              <div className="p-0 bg-white shadow-lg rounded-md text-black w-[200px]">
-                <Image
-                  src={selectedHouse.images[0]?.src || "/placeholder.jpg"}
-                  width={200}
-                  height={100}
-                  alt={selectedHouse.title}
-                  className="w-full h-32 object-cover rounded-md"
-                />
-                <div className="p-2">
-                  <h3 className="text-lg font-semibold">{selectedHouse.title}</h3>
-                  <p className="text-gray-600">{selectedHouse.price}</p>
+              <div className="bg-white rounded-xl overflow-hidden shadow-lg w-64">
+                <div className="relative w-full h-40">
+                  <Image
+                    src={selectedHouse.images[0]?.src || "/placeholder.jpg"}
+                    alt={selectedHouse.title}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <div className="p-4">
+                  <h3 className="text-xl font-semibold text-gray-800 truncate">
+                    {selectedHouse.title}
+                  </h3>
+                  <p className="mt-1 text-lg font-bold text-green-600">
+                    {selectedHouse.price}
+                  </p>
+                  {/* Optional: add more details if available */}
+                  {selectedHouse.bedrooms && selectedHouse.bathrooms && (
+                    <p className="mt-2 text-sm text-gray-600">
+                      {selectedHouse.bedrooms} bd • {selectedHouse.bathrooms} ba • {selectedHouse.size} sqft
+                    </p>
+                  )}
+                  <button
+                    onClick={() => {
+                      // handle navigation or more info
+                      window.open(`/houses/${selectedHouse.id}`, '_blank');
+                    }}
+                    className="mt-4 w-full py-2 text-center bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                  >
+                    View Details
+                  </button>
                 </div>
               </div>
             </Popup>
           )}
-
-        {/* ✅ Custom Raster Layer */}
-        {mapLoaded && (
-           <Source
-                 id="stadiamaps-sat-tiles"
-                 type="raster"
-                 tiles={[
-                   "https://tiles.stadiamaps.com/tiles/alidade_satellite/{z}/{x}/{y}{r}.jpg?api_key=37c5a6d2-4f8e-4fa6-ab87-717011524156",
-                 ]}
-                 tileSize={256}
-               >
-                 <Layer id="stadiamaps-sat-layer" type="raster" paint={{ "raster-opacity": 1 }} />
-               </Source>
-        )}
-
-        
       </Map>
     </div>
   );
