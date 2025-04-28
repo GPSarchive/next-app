@@ -80,7 +80,7 @@ export default async function HomePage() {
     <div className='bg-white w-full'>
     <div className="max-w-7xl mx-auto mt-12 bg-white border-2 border-white-300 rounded-lg shadow-md p-6">
       <h1 className="text-4xl font-extrabold text-center mb-8">
-        Featured Properties For Sale
+        Featured Rental Properties 
       </h1>
       <HomeHouseGrid houses={houses} />
     </div>

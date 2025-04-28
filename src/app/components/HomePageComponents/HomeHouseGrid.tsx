@@ -37,19 +37,22 @@ export default function HomeHouseGrid({ houses }: HouseGridProps) {
             <h2 className="text-lg font-semibold mb-1">{house.title}</h2>
             <p className="text-gray-700 mb-2">{house.price}</p>
             <div className="flex items-center text-gray-600 text-sm mb-4 space-x-4">
-            <span className="text-lg font-bold">{house.size} sqft</span>
-              <div className="flex items-center space-x-1">
-                <div className="w-8 h-8 relative">
+            <div className="w-10 h-10 relative">
+                  <Image src="/icons/m2.svg" alt="size" fill className="object-contain" />
+                </div>
+            <span className="text-lg font-bold ml-2">{house.size} </span>
+              <span className="flex items-center space-x-1">
+                <div className="w-10 h-10 relative">
                   <Image src="/icons/bedroom.svg" alt="Bedrooms" fill className="object-contain" />
                 </div>
-                <span className="text-lg font-bold">{house.bathrooms}</span>
-              </div>
-              <div className="flex items-center space-x-1">
-                <div className="w-8 h-8 relative">
+                <span className="text-lg font-bold">{house.bedrooms}</span>
+              </span>
+              <span className="flex items-center space-x-1">
+                <div className="w-10 h-10 relative">
                   <Image src="/icons/bathroom.svg" alt="Bathrooms" fill className="object-contain" />
                 </div>
                 <span className="text-lg font-bold">{house.bathrooms}</span>
-              </div>
+              </span>
             </div>
 
             {/* ✅ View Property Button (hidden on mobile) */}
