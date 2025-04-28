@@ -7,6 +7,8 @@ import { getFirebaseAdminDB } from '@/app/lib/firebaseAdmin';
 import { House } from '@/app/types/house';
 import HomeHouseGrid from '@/app/components/HomePageComponents/HomeHouseGrid';
 import FAQ, { FAQItem } from '@/app/components/HomePageComponents/FAQ';
+import Footer from '@/app/lib/Footer';
+
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -65,9 +67,9 @@ export default async function HomePage() {
             </h1>
             <HomeHouseGrid houses={houses} />
           </div>   
-       <FAQ items={faqItems} />
-      </div>
+          <FAQ items={faqItems} />
+       <Footer />
+     </div>
     </>
   );
 }
-

@@ -97,29 +97,31 @@ const HouseCarousel = ({ house, onHover }: HouseCarouselProps) => {
       <Slider {...settings}>
         {house.images.map((img, index) => (
           <figure
-            key={index}
-            className="relative w-full h-64 overflow-hidden -mb-[10px] p-0 flex items-center justify-center rounded-lg"
-          >
-            <Image
-              src={img.src}
-              alt={img.alt ?? `${house.title} — image ${index + 1}`}
-              width={1200}
-              height={800}
-              className="w-fit h-full objec"
-              priority={index === 0}
-            />
-            <figcaption className="hidden">
-              {house.title} — {house.price}
-            </figcaption>
-            <div
+          key={index}
+          className="relative w-full h-64 overflow-hidden -mb-[10px] p-0 flex items-center justify-center rounded-lg"
+        >
+          <Image
+            src={img.src}
+            alt={img.alt ?? `${house.title} — image ${index + 1}`}
+            fill
+            sizes="(max-width: 768px) 100vw, 700px"
+            className="object-cover w-full h-full"
+            priority={index === 0}
+          />
+          <figcaption className="hidden">
+            {house.title} — {house.price}
+          </figcaption>
+          <div
             className="
               absolute bottom-0 left-0 w-full h-16
               bg-gradient-to-t from-black/80 to-transparent
               pointer-events-none rounded-b-lg
               opacity-0
               transition-opacity duration-300 ease-in-out
-               group-hover:opacity-100" />
-          </figure>
+              group-hover:opacity-100
+            "
+          />
+        </figure>
         ))}
       </Slider>
 
@@ -127,6 +129,7 @@ const HouseCarousel = ({ house, onHover }: HouseCarouselProps) => {
         absolute bottom-0 left-0 w-full
         bg-gradient-to-t from-black/80 to-transparent 
         text-white p-2.5
+        rounded-b-lg
         opacity-0 transition-opacity duration-300 ease-in-out
         group-hover:opacity-100"
         >
