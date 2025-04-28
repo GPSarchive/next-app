@@ -1,4 +1,3 @@
-//app/lib/ContactForm.tsx
 'use client';
 
 import { useState } from 'react';
@@ -9,6 +8,7 @@ type FormData = {
   email: string;
   number: string;
   message: string;
+  privacyConsent: boolean;              // <-- new
 };
 
 export default function ContactForm() {
@@ -18,6 +18,7 @@ export default function ContactForm() {
     email: '',
     number: '',
     message: '',
+    privacyConsent: false,               // <-- new
   });
 
   const [loading, setLoading] = useState(false);
@@ -27,10 +28,10 @@ export default function ContactForm() {
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target as HTMLInputElement;
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: type === 'checkbox' ? checked : value,
     }));
   };
 
@@ -43,14 +44,13 @@ export default function ContactForm() {
     try {
       const response = await fetch('/api/contact', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to send message.');
+        const body = await response.json();
+        throw new Error(body.error || 'Failed to send message.');
       }
 
       setSuccess(true);
@@ -60,9 +60,10 @@ export default function ContactForm() {
         email: '',
         number: '',
         message: '',
+        privacyConsent: false,           // reset checkbox
       });
     } catch (err) {
-      setError((err as Error).message || 'Unknown error occurred.');
+      setError((err as Error).message);
     } finally {
       setLoading(false);
     }
@@ -119,6 +120,29 @@ export default function ContactForm() {
         required
         className="w-full p-2 border rounded h-32"
       />
+
+      <div className="flex items-center">
+        <input
+          id="privacyConsent"
+          type="checkbox"
+          name="privacyConsent"
+          checked={formData.privacyConsent}
+          onChange={handleChange}
+          required
+          className="mr-2"
+        />
+        <label htmlFor="privacyConsent" className="text-sm">
+          I have read and agree to the{' '}
+          <a
+            href="/privacy-policy"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline"
+          >
+            Privacy Policy
+          </a>
+        </label>
+      </div>
 
       <button
         type="submit"
