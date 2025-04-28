@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { auth } from '@/app/firebase/firebaseClient';
 import { onAuthStateChanged, User } from 'firebase/auth';
-import styles from '@/app/components/DetailsPageComponents/NavBar.module.css';
 import { Poppins } from 'next/font/google';
 
 const poppins = Poppins({
@@ -18,7 +17,6 @@ const NavBar = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Listen for auth state changes
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
@@ -30,8 +28,8 @@ const NavBar = () => {
 
   const handleLogout = async (): Promise<void> => {
     try {
-      await auth.signOut(); // Sign out from Firebase
-      const res = await fetch('/api/session', { method: 'DELETE' }); // Clear session cookie
+      await auth.signOut();
+      const res = await fetch('/api/session', { method: 'DELETE' });
       if (res.ok) {
         router.push('/login');
       } else {
@@ -42,7 +40,6 @@ const NavBar = () => {
     }
   };
 
-  // Derive username from displayName or email
   const getUsername = (user: User): string => {
     if (user.displayName) return user.displayName;
     if (user.email) return user.email.split('@')[0];
@@ -50,31 +47,54 @@ const NavBar = () => {
   };
 
   return (
-    <nav className={`${styles.navbar} ${poppins.className}`}>
-      <a href="mailto:support@property-hall.com">support@property-hall.com</a>
-      <ul className={styles.navLinks}>
+    <nav
+      className={`${poppins.className} fixed top-0 left-0 w-full h-[65px] bg-white bg-gradient-to-b from-white/95 to-white/90 shadow-md flex items-center justify-center px-8 text-gray-800 text-lg font-medium z-50 relative`}
+    >
+      {/* Email link on the top-left */}
+      <div className="absolute top-2 left-4">
+        <a
+          href="mailto:support@property-hall.com"
+          className="text-xs underline text-inherit"
+        >
+          support@property-hall.com
+        </a>
+      </div>
+
+      {/* Centered Navigation */}
+      <ul className="list-none flex items-center gap-6 text-base tracking-wide">
         <li>
-          <Link href="/">Home</Link>
+          <Link href="/" className="relative pb-1 text-gray-800 font-medium hover:text-blue-500 hover:drop-shadow-md transition-all">
+            Home
+          </Link>
         </li>
         <li>
-          <Link href="/listings">Listings</Link>
+          <Link href="/listings" className="relative pb-1 text-gray-800 font-medium hover:text-blue-500 hover:drop-shadow-md transition-all">
+            Listings
+          </Link>
         </li>
         <li>
-          <Link href="/contact">Contact</Link>
+          <Link href="/contact" className="relative pb-1 text-gray-800 font-medium hover:text-blue-500 hover:drop-shadow-md transition-all">
+            Contact
+          </Link>
         </li>
         <li>
           {loading ? (
             <span>Loading...</span>
           ) : user ? (
-            <div className={styles.userSection}>
-              <span className={styles.userIcon}>🧑</span>
-              <span className={styles.username}>{getUsername(user)}</span>
-              <button onClick={handleLogout} className={styles.logoutBtn}>
+            <div className="flex items-center gap-2">
+              <span className="text-xl">🧑</span>
+              <span className="relative pb-1 text-gray-800 font-medium hover:text-blue-500 hover:drop-shadow-md transition-all">
+                {getUsername(user)}
+              </span>
+              <button
+                onClick={handleLogout}
+                className="relative pb-1 text-gray-800 font-medium hover:text-blue-500 hover:drop-shadow-md transition-all"
+              >
                 Logout
               </button>
             </div>
           ) : (
-            <Link href="/login" className={styles.loginLink}>
+            <Link href="/login" className="relative pb-1 text-gray-800 font-medium hover:text-blue-500 hover:drop-shadow-md transition-all">
               Login
             </Link>
           )}

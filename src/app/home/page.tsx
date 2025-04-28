@@ -54,37 +54,46 @@ export default async function HomePage() {
   return (
     <>
   <NavBar />
-  <div className=" bg-[#D6D2C4] min-h-screen">
+  <div className=" bg-[#D6D2C4]  min-h-screen">
 
     {/* ✅ Carousel + Filters (relative positioning only inside this block) */}
     
-    <div className="relative w-full bg-white ">
+    <div className="relative w-full bg-white shadow-lg rounded-md">
       <HomeCarousel houses={houses} />
 
       {/* Filters floating over */}
-      <div className="absolute w-full bottom-6 left-1/2 transform -translate-x-1/2 translate-y-1/2 z-10">
+      <div className="absolute w-full bottom-6 shadow-lg rounded-md left-1/2 transform -translate-x-1/2 translate-y-1/2 z-10">
         <Filters houses={houses} />
       </div>
     </div>
 
     {/* ✅ Spacer div to push page content down */}
-    <div className="h-[100px]" />
+    
 
     {/* ✅ Now real page content starts */}
-    <div className="max-w-7xl mx-auto mt-12 bg-[#D6D2C4]  p-6">
-      <h1 className="text-4xl font-extrabold text-center color-[361e1a] mb-8">
-        Featured Properties For Sale
-      </h1>
-      <HomeHouseGrid houses={houses} />
-    </div>
-    <div className='bg-white w-full'>
-    <div className="max-w-7xl mx-auto mt-12 bg-white border-2 border-white-300 rounded-lg shadow-md p-6">
-      <h1 className="text-4xl font-extrabold text-center mb-8">
-        Featured Rental Properties 
-      </h1>
-      <HomeHouseGrid houses={houses} />
-    </div>
-    </div>
+    
+    {/* ✅ Featured Properties For Sale */}
+      <div className="w-full mt-12 shadow-lg bg-[#D6D2C4] p-6">
+        <div className="max-w-7xl mx-auto bg-[#D6D2C4] p-6">
+          <h1 className="text-4xl font-extrabold text-center text-[#361e1a] mb-8">
+            Featured Properties For Sale
+          </h1>
+          <HomeHouseGrid houses={houses} />
+        </div>
+      </div>
+
+      {/* ✅ Shadow Separator */}
+      <div className="w-full h-6 shadow-inner shadow-lg bg-white" />
+
+      {/* ✅ Featured Rental Properties */}
+      <div className="bg-white shadow-lg rounded-md w-full">
+        <div className="max-w-7xl mx-auto bg-white border-2 border-white-300 rounded-lg  p-6">
+          <h1 className="text-4xl font-extrabold text-center mb-8">
+            Featured Rental Properties
+          </h1>
+          <HomeHouseGrid houses={houses} />
+        </div>
+      </div>
     <FAQ items={faqItems} />
     <Footer />
   </div>

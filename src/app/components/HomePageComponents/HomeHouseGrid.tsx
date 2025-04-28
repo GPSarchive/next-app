@@ -58,7 +58,7 @@ export default function HomeHouseGrid({ houses }: HouseGridProps) {
             {/* ✅ View Property Button (hidden on mobile) */}
             <Link
               href={`/houses/${house.id}`}
-              className="hidden sm:inline-block px-4 py-2 text-sm font-medium border border-black text-black rounded transition-colors duration-150 hover:bg-[rgb(184,161,125)] hover:border hover:border-[rgb(184,161,125)] hover:text-white"
+              className="hidden sm:inline-block px-4 py-2 text-sm font-medium border border-[rgb(184,161,125)] bg-[rgb(184,161,125)] text-white rounded transition-colors  hover:bg-white hover:text-black hover:border hover:border-black transition-all duration-200"
             >
               View Property
             </Link>
