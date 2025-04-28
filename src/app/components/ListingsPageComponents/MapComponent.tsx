@@ -48,7 +48,7 @@ const MapComponent = ({
     <div className="w-full h-full relative">
       <Map
         {...viewState}
-        mapStyle="https://tiles.stadiamaps.eu/styles/alidade_satellite.json"
+        mapStyle="https://tiles.stadiamaps.com/styles/alidade_satellite.json"
         style={{ width: "100%", height: "100%" }}
         attributionControl={{ compact: true }}
         onLoad={() => setMapLoaded(true)}
