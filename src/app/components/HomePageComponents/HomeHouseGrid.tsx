@@ -38,20 +38,20 @@ export default function HomeHouseGrid({ houses }: HouseGridProps) {
             <p className="text-gray-700 mb-2">{house.price}</p>
             <div className="flex items-center text-gray-600 text-sm mb-4 space-x-4">
             <div className="w-10 h-10 relative">
-                  <Image src="/icons/m2.svg" alt="size" fill className="object-contain" />
+                  <Image src="/icons/m2.svg" alt="m^2" fill className="object-contain" />
                 </div>
-            <span className="text-lg font-bold ml-2">{house.size} </span>
+            <span className="text-lg font-bold pr-2">{house.size}</span>
               <span className="flex items-center space-x-1">
                 <div className="w-10 h-10 relative">
                   <Image src="/icons/bedroom.svg" alt="Bedrooms" fill className="object-contain" />
                 </div>
-                <span className="text-lg font-bold">{house.bedrooms}</span>
+                <span className="text-lg font-bold pl-3">{house.bedrooms}</span>
               </span>
               <span className="flex items-center space-x-1">
                 <div className="w-10 h-10 relative">
                   <Image src="/icons/bathroom.svg" alt="Bathrooms" fill className="object-contain" />
                 </div>
-                <span className="text-lg font-bold">{house.bathrooms}</span>
+                <span className="text-lg font-bold pl-2">{house.bathrooms}</span>
               </span>
             </div>
 
