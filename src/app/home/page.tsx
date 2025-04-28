@@ -71,15 +71,22 @@ export default async function HomePage() {
     <div className="h-[100px]" />
 
     {/* ✅ Now real page content starts */}
+    <div className="max-w-7xl mx-auto mt-12 bg-[#D6D2C4]  p-6">
+      <h1 className="text-4xl font-extrabold text-center color-[361e1a] mb-8">
+        Featured Properties For Sale
+      </h1>
+      <HomeHouseGrid houses={houses} />
+    </div>
+    <div className='bg-white w-full'>
     <div className="max-w-7xl mx-auto mt-12 bg-white border-2 border-white-300 rounded-lg shadow-md p-6">
       <h1 className="text-4xl font-extrabold text-center mb-8">
         Featured Properties For Sale
       </h1>
       <HomeHouseGrid houses={houses} />
     </div>
-
+    </div>
     <FAQ items={faqItems} />
-    
+    <Footer />
   </div>
 </>
   );

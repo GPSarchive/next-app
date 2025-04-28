@@ -12,6 +12,10 @@ export default function Footer() {
           © {new Date().getFullYear()} Your Company Name. All rights reserved.
         </p>
       </div>
+      <p className="text-xs text-gray-500 mt-4 text-right">
+        Icon by <a className="link_pro" href="https://freeicons.io/city-elements-icon-set-14/bed-city-elements-bedroom-hotel-sleep-icon-769408">ColourByteDesigns</a>on <a href="https://freeicons.io">freeicons.io</a> 
+      </p>
+      
     </footer>
   );
 }

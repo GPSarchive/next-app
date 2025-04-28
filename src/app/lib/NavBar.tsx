@@ -51,6 +51,7 @@ const NavBar = () => {
 
   return (
     <nav className={`${styles.navbar} ${poppins.className}`}>
+      <a href="mailto:support@property-hall.com">support@property-hall.com</a>
       <ul className={styles.navLinks}>
         <li>
           <Link href="/">Home</Link>
