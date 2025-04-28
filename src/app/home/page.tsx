@@ -73,8 +73,8 @@ export default async function HomePage() {
     {/* ✅ Now real page content starts */}
     
     {/* ✅ Featured Properties For Sale */}
-      <div className="w-full mt-12 shadow-lg bg-[#D6D2C4] p-6">
-        <div className="max-w-7xl mx-auto bg-[#D6D2C4] p-6">
+      <div className="w-full mt-12 shadow-lg bg-[#D6D2C4] p-12">
+        <div className="max-w-7xl mx-auto bg-[#D6D2C4] p-12">
           <h1 className="text-4xl font-extrabold text-center text-[#361e1a] mb-8">
             Featured Properties For Sale
           </h1>
@@ -95,7 +95,7 @@ export default async function HomePage() {
         </div>
       </div>
     <FAQ items={faqItems} />
-    <Footer />
+    
   </div>
 </>
   );
