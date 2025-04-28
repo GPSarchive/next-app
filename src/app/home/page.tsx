@@ -86,7 +86,7 @@ export default async function HomePage() {
       <div className="w-full h-6 shadow-inner shadow-lg bg-white" />
 
       {/* ✅ Featured Rental Properties */}
-      <div className="bg-white shadow-lg rounded-md w-full">
+      <div className="bg-white shadow-lg rounded-md w-full ">
         <div className="max-w-7xl mx-auto bg-white border-2 border-white-300 rounded-lg  p-6">
           <h1 className="text-4xl font-extrabold text-center mb-8">
             Featured Rental Properties

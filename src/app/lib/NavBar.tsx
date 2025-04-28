@@ -48,7 +48,7 @@ const NavBar = () => {
 
   return (
     <nav
-      className={`${poppins.className} fixed inset-x-0 top-0 h-[65px] bg-white bg-gradient-to-b from-white/95 to-white/90 shadow-md flex items-center justify-center px-8 text-gray-800 text-lg font-medium z-[9999]`}
+      className={`${poppins.className} fixed inset-x-0 top-0 h-[100px] bg-white bg-gradient-to-b from-white/95 to-white/90 shadow-md flex items-center justify-center px-8 text-gray-800 text-lg font-medium z-[9999]`}
     >
       {/* Email link on the top-left */}
       <div className="absolute top-2 left-4">

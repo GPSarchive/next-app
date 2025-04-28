@@ -54,10 +54,14 @@ export default function Gallery({ images }: GalleryProps) {
   return (
     <div className="flex flex-col items-center  max-w-[100%] mx-auto bg-[#D6D2C4]">
       {/* Main Carousel */}
-      <div className="w-full h-[800px] overflow-hidden">
+      <div className="w-full 
+                h-[200px] sm:h-[300px] md:h-[500px] 
+                lg:h-[800px] 
+                overflow-hidden">
         <Swiper
           onSwiper={(s) => (mainSwiperRef.current = s)}
           onSlideChange={(s) => setSelectedIndex(s.realIndex)}
+          
           navigation loop autoplay={{ delay: 4000, disableOnInteraction: false }}
           speed={600} modules={[Navigation, Autoplay]}
           className="w-full h-full"
@@ -80,7 +84,18 @@ export default function Gallery({ images }: GalleryProps) {
       <div className="w-full h-full bg-[#D6D2C4]/50 py-4 px-2">
         <Swiper
           onSwiper={(s) => (thumbSwiperRef.current = s)}
-          freeMode slidesPerView={6} spaceBetween={8} loop
+          freeMode 
+          spaceBetween={8}
+          loop
+          breakpoints={{
+            // when window width >= 320px
+            320: { slidesPerView: 2 },
+            // >= 640px
+            640: { slidesPerView: 4 },
+            // >= 1024px
+            1024: { slidesPerView: 6 },
+          }}
+        
           modules={[FreeMode]}
           className="h-[1000%]"
         >

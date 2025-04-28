@@ -76,7 +76,7 @@ export default async function SecureListingsPage({
 
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden pt-[60px]">
+    <div className="flex flex-col h-screen overflow-hidden ">
       <NavBar />
       <ListingsClientWrapper initialHouses={filtered} />
     </div>
