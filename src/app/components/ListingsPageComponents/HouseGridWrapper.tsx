@@ -1,38 +1,32 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import HouseGrid from "@/app/components/ListingsPageComponents/HouseGrid";
-
-// =======================
-// Types
-// =======================
-
+import React from 'react';
+import HouseGrid from '@/app/components/ListingsPageComponents/HouseGrid';
 import { House } from '@/app/types/house';
 
 type Props = {
   houses: House[];
+  /**
+   * Called when a house card is hovered over or hovered out.
+   * Pass null on hover out to close the popup.
+   */
+  onHover: (house: House | null) => void;
 };
 
-// =======================
-// Component
-// =======================
-
-export default function HouseGridWrapper({ houses }: Props) {
-  const [hoveredId, setHoveredId] = useState<string | null>(null);
-
+export default function HouseGridWrapper({ houses, onHover }: Props) {
   const handleHover = (house: House) => {
-    setHoveredId(house.id);
-    // Optional: log or use this state for map interaction, etc.
+    onHover(house);
+  };
+  const handleLeave = () => {
+    onHover(null);
   };
 
   return (
-    <HouseGrid
-      houses={houses.map((house) => ({
-        ...house,
-        firestoreId: house.id, // Assign default firestoreId if missing
-      }))}
-      onHover={handleHover}
-    />
+    <div onMouseLeave={handleLeave}>
+      <HouseGrid
+        houses={houses.map((h) => ({ ...h, firestoreId: h.id }))}
+        onHover={handleHover}
+      />
+    </div>
   );
 }
-  // Removed redundant code block that redefines housesWithFirestoreId

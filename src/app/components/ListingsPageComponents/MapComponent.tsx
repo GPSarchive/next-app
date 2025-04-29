@@ -1,26 +1,14 @@
 'use client';
 
-import { useState } from "react";
-import Map, {
-  Marker,
-  Popup,
-  NavigationControl,
-  ViewStateChangeEvent,
-} from "react-map-gl/maplibre";
-import "maplibre-gl/dist/maplibre-gl.css";
-import Image from "next/image";
+import React, { useRef, useCallback, useEffect } from 'react';
+import { useLoadScript, GoogleMap, Marker, InfoWindow } from '@react-google-maps/api';
+import Image from 'next/image';
 import { House } from '@/app/types/house';
-
-// =======================
-// Types
-// =======================
 
 type ViewState = {
   longitude: number;
   latitude: number;
   zoom: number;
-  pitch?: number;
-  bearing?: number;
 };
 
 type Props = {
@@ -31,9 +19,8 @@ type Props = {
   setSelectedHouse?: (house: House | null) => void;
 };
 
-// =======================
-// Component
-// =======================
+const MAP_CONTAINER_STYLE = { width: '100%', height: '100%' };
+const libraries = ['places'] as const;
 
 const MapComponent = ({
   houses,
@@ -42,91 +29,141 @@ const MapComponent = ({
   setViewState = () => {},
   setSelectedHouse = () => {},
 }: Props) => {
-  const [mapLoaded, setMapLoaded] = useState<boolean>(false);
+  const { isLoaded, loadError } = useLoadScript({
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!,
+    libraries: [...libraries],
+  });
+
+  // Keep a ref to the map instance
+  const mapRef = useRef<google.maps.Map | null>(null);
+
+  // Store map instance on load
+  const onMapLoad = useCallback((map: google.maps.Map) => {
+    mapRef.current = map;
+  }, []);
+
+  // Clear ref on unmount
+  const onMapUnmount = useCallback(() => {
+    mapRef.current = null;
+  }, []);
+
+  // Smoothly pan map when a house is selected
+  useEffect(() => {
+    if (selectedHouse && mapRef.current) {
+      const lat = Number(selectedHouse.location.latitude);
+      const lng = Number(selectedHouse.location.longitude);
+      if (!isNaN(lat) && !isNaN(lng)) {
+        mapRef.current.panTo({ lat, lng });
+      }
+    }
+  }, [selectedHouse]);
+
+  // After any pan/zoom, sync React state
+  const onIdle = useCallback(() => {
+    if (!mapRef.current) return;
+    const center = mapRef.current.getCenter();
+    const zoom = mapRef.current.getZoom();
+    if (center && typeof zoom === 'number') {
+      setViewState({
+        latitude: center.lat(),
+        longitude: center.lng(),
+        zoom,
+      });
+    }
+  }, [setViewState]);
+
+  if (loadError) return <div>Error loading Google Maps</div>;
+  if (!isLoaded) return <div>Loading map…</div>;
 
   return (
     <div className="w-full h-full relative">
-      <Map
-        {...viewState}
-        mapStyle="https://tiles.stadiamaps.com/styles/alidade_satellite.json?api_key=37c5a6d2-4f8e-4fa6-ab87-717011524156"
-        style={{ width: "100%", height: "100%" }}
-        attributionControl={{ compact: true }}
-        onLoad={() => setMapLoaded(true)}
-        onMove={(evt: ViewStateChangeEvent) => setViewState(evt.viewState)}
+      <GoogleMap
+        mapContainerStyle={MAP_CONTAINER_STYLE}
+        center={{ lat: viewState.latitude, lng: viewState.longitude }}
+        zoom={viewState.zoom}
+        options={{ mapTypeId: 'hybrid', streetViewControl: false, mapTypeControl: false, fullscreenControl: false, zoomControl: true }}
+        onLoad={onMapLoad}
+        onUnmount={onMapUnmount}
+        onIdle={onIdle}
       >
-        <NavigationControl position="top-right" />
+        {houses.map((house) => {
+          const lat = Number(house.location?.latitude);
+          const lng = Number(house.location?.longitude);
+          if (isNaN(lat) || isNaN(lng)) return null;
 
-        {/* ✅ Markers */}
-        {houses.map((house) =>
-          house.location?.latitude && house.location?.longitude ? (
+          return (
             <Marker
               key={house.id}
-              longitude={house.location.longitude}
-              latitude={house.location.latitude}
-              onClick={(e) => {
-                e.originalEvent.stopPropagation();
-                setSelectedHouse(house);
+              position={{ lat, lng }}
+              onClick={() => setSelectedHouse(house)}
+              icon={{
+                url: '/marker.svg',
+                scaledSize: new google.maps.Size(40, 40),
+                anchor: new google.maps.Point(20, 40),
               }}
-              anchor="bottom"
-            >
-              <img
-                src="/marker.svg"
-                alt="Marker"
-                className="w-8 h-8 hover:scale-125 transition-transform duration-200 cursor-pointer"
-              />
-            </Marker>
-          ) : null
-        )}
+            />
+          );
+        })}
 
-        {/* ✅ Styled Popup for selected house */}
-        {selectedHouse &&
-          selectedHouse.location?.latitude &&
-          selectedHouse.location?.longitude && (
-            <Popup
-              longitude={selectedHouse.location.longitude}
-              latitude={selectedHouse.location.latitude}
-              closeButton
-              closeOnClick={false}
-              onClose={() => setSelectedHouse(null)}
-              anchor="top"
-              className="!p-0 !shadow-2xl rounded-xl overflow-hidden"
-            >
-              <div className="bg-white rounded-xl overflow-hidden shadow-lg w-64">
-                <div className="relative w-full h-40">
-                  <Image
-                    src={selectedHouse.images[0]?.src || "/placeholder.jpg"}
-                    alt={selectedHouse.title}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-                <div className="p-4">
-                  <h3 className="text-xl font-semibold text-gray-800 truncate">
-                    {selectedHouse.title}
-                  </h3>
-                  <p className="mt-1 text-lg font-bold text-green-600">
-                    {selectedHouse.price}
-                  </p>
-                  {/* Optional: add more details if available */}
-                  {selectedHouse.bedrooms && selectedHouse.bathrooms && (
-                    <p className="mt-2 text-sm text-gray-600">
-                      {selectedHouse.bedrooms} bd • {selectedHouse.bathrooms} ba • {selectedHouse.size} sqft
+        {selectedHouse && (() => {
+          const lat = Number(selectedHouse.location.latitude);
+          const lng = Number(selectedHouse.location.longitude);
+          if (isNaN(lat) || isNaN(lng)) return null;
+
+          return (
+            <InfoWindow position={{ lat, lng }} onCloseClick={() => setSelectedHouse(null)}>
+              <>
+                <div className="w-64 fade-in-popup">
+                  <div className="relative w-full h-40">
+                    <Image
+                      src={selectedHouse.images[0]?.src || '/placeholder.jpg'}
+                      alt={selectedHouse.title}
+                      fill
+                      className="object-cover rounded-t-xl"
+                    />
+                  </div>
+                  <div className="p-4 bg-white rounded-b-xl shadow-md">
+                    <h3 className="text-xl font-semibold text-gray-800 truncate">
+                      {selectedHouse.title}
+                    </h3>
+                    <p className="mt-1 text-lg font-bold text-green-600">
+                      {selectedHouse.price}
                     </p>
-                  )}
-                  <button
-                    onClick={() => {
-                      // handle navigation or more info
-                      window.open(`/houses/${selectedHouse.id}`, '_blank');
-                    }}
-                    className="mt-4 w-full py-2 text-center bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-                  >
-                    View Details
-                  </button>
+                    {selectedHouse.bedrooms != null &&
+                       selectedHouse.bathrooms != null && (
+                      <p className="mt-2 text-sm text-gray-600">
+                        {selectedHouse.bedrooms} bd • {selectedHouse.bathrooms} ba •{' '}
+                        {selectedHouse.size} sqft
+                      </p>
+                    )}
+                    <button
+                      onClick={() => window.open(`/houses/${selectedHouse.id}`, '_blank')}
+                      className="mt-4 w-full py-2 text-center bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                    >
+                      View Details
+                    </button>
+                  </div>
                 </div>
-              </div>
-            </Popup>
-          )}
-      </Map>
+                <style jsx>{`
+                  .fade-in-popup {
+                    animation: fadeIn 1s ease-out;
+                  }
+                  @keyframes fadeIn {
+                    from {
+                      opacity: 0;
+                      transform: scale(0.95);
+                    }
+                    to {
+                      opacity: 1;
+                      transform: scale(1);
+                    }
+                  }
+                `}</style>
+              </>
+            </InfoWindow>
+          );
+        })()}
+      </GoogleMap>
     </div>
   );
 };

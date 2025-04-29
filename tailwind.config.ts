@@ -12,12 +12,15 @@ const config: Config = {
       colors: {
         backgroundSand: "#D6D2C4",
       },
-      backgroundColor: {
+      backgroundColor: {  
         'white-10': 'rgba(255, 255, 255, 0.1)',
       },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
         "gradient-conic": "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
+      },
+      fontFamily: {
+        sans: ['var(--font-montserrat)', 'sans-serif'], // 👈 Add Montserrat as default
       },
       keyframes: {
         fadeInLine: {

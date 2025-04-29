@@ -1,3 +1,4 @@
+//listings/page.tsx
 import NavBar from '@/app/lib/NavBar';
 import ListingsClientWrapper from '@/app/components/ListingsPageComponents/ListingsClientWrapper';
 import { getFirebaseAdminDB } from '@/app/lib/firebaseAdmin';

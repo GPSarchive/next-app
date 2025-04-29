@@ -1,9 +1,16 @@
+// app/layout.tsx
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Montserrat } from "next/font/google";
 import "./globals.css";
-import NavBar from "@/app/lib/NavBar"; // 👈 import your NavBar here
-
-const inter = Inter({ subsets: ["latin"] });
+import NavBar from "@/app/lib/NavBar";
+import { ReactNode } from "react";
+import { usePathname } from 'next/navigation';
+const montserrat = Montserrat({ 
+  subsets: ["latin"],
+  variable: '--font-montserrat',
+  weight: ["400", "700"],
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -12,17 +19,36 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: {
+  children: ReactNode;
+}) {
   return (
     <html lang="en">
-      <body className={inter.className}>
-        <NavBar /> {/* 👈 Render the NavBar */}
-        <main className="mt-[100px]">
-          {children}
-        </main>
+      <body className={`${montserrat.variable} font-sans`}>
+        <LayoutWrapper>{children}</LayoutWrapper>
       </body>
     </html>
   );
 }
+
+// 👇 Helper component using client hooks
+'use client';
+
+
+const LayoutWrapper = ({ children }: { children: ReactNode }) => {
+  const pathname = usePathname();
+
+  // List of routes where the navbar should be hidden
+  const hiddenNavRoutes = ['/login', '/signup', '/forgot-password'];
+
+  const showNavbar = !hiddenNavRoutes.includes(pathname);
+
+  return (
+    <>
+      {showNavbar && <NavBar />}
+      <main className={showNavbar ? "mt-[100px]" : ""}>
+        {children}
+      </main>
+    </>
+  );
+};
